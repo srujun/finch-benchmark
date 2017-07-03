@@ -5,3 +5,7 @@ services:
     restart: always
     ports:
       - "2181:2181"
+  scratchpad-java:
+    image: anapsix/alpine-java
+    volumes:
+      - ./playground:/playground:ro
