@@ -1,0 +1,6 @@
+[submodule "kafka-manager"]
+	path = kafka-manager
+	url = https://github.com/yahoo/kafka-manager
+[submodule "hello-samza"]
+	path = hello-samza
+	url = https://github.com/apache/samza-hello-samza
