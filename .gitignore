@@ -2,3 +2,5 @@
 .vagrant/
 /*.log
 .project
+.vscode/
+.settings/
