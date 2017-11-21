@@ -18,6 +18,14 @@
     </description>
     <url>http://srujun.com/</url>
 
+    <properties>
+        <!-- maven specific properties -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <samza.version>0.13.1-SNAPSHOT</samza.version>
+        <kafka.version>0.10.1.1</kafka.version>
+        <hadoop.version>2.6.1</hadoop.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.samza</groupId>
@@ -29,11 +37,11 @@
             <artifactId>samza-core_2.11</artifactId>
             <version>${samza.version}</version>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.apache.samza</groupId>-->
-            <!--<artifactId>samza-log4j</artifactId>-->
-            <!--<version>${samza.version}</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>org.apache.samza</groupId>
+            <artifactId>samza-log4j</artifactId>
+            <version>${samza.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.samza</groupId>
             <artifactId>samza-shell</artifactId>
@@ -46,26 +54,39 @@
             <artifactId>samza-yarn_2.11</artifactId>
             <version>${samza.version}</version>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.apache.samza</groupId>-->
-            <!--<artifactId>samza-kv_2.11</artifactId>-->
-            <!--<version>${samza.version}</version>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.apache.samza</groupId>-->
-            <!--<artifactId>samza-kv-rocksdb_2.11</artifactId>-->
-            <!--<version>${samza.version}</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>org.apache.samza</groupId>
+            <artifactId>samza-kv_2.11</artifactId>
+            <version>${samza.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.samza</groupId>
+            <artifactId>samza-kv-rocksdb_2.11</artifactId>
+            <version>${samza.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.samza</groupId>
             <artifactId>samza-kafka_2.11</artifactId>
             <version>${samza.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka_2.11</artifactId>
-            <version>0.10.1.1</version>
+            <version>${kafka.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.6.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.6.2</version>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-yarn-api</artifactId>
@@ -81,14 +102,13 @@
             <artifactId>hadoop-yarn-common</artifactId>
             <version>${hadoop.version}</version>
         </dependency>
-    </dependencies>
 
-    <properties>
-        <!-- maven specific properties -->
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <samza.version>0.13.1-SNAPSHOT</samza.version>
-        <hadoop.version>2.6.1</hadoop.version>
-    </properties>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>3.6.1</version>
+        </dependency>
+    </dependencies>
 
     <developers>
         <developer>

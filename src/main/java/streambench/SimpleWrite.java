@@ -6,7 +6,6 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 
 import java.time.Instant;
 import java.util.Properties;
-import java.util.Random;
 import java.util.concurrent.*;
 import java.util.stream.IntStream;
 
@@ -26,9 +25,6 @@ public class SimpleWrite {
             System.exit(1);
         }
 
-//        Random rand = new Random();
-//        rand.setSeed(7762);
-
         double zipfParam = Double.valueOf(args[0]);
         ZipfDistribution zipf = new ZipfDistribution(NUM_KEYS, zipfParam);
 
@@ -43,7 +39,6 @@ public class SimpleWrite {
         KafkaProducer<String, String> producer = new KafkaProducer<>(config);
 
         final Runnable emitter = () -> {
-//            int index = rand.nextInt(NUM_KEYS);
             int index = zipf.sample() - 1;  // adjust for returned range of [1, k]
             final ProducerRecord<String, String> record = new ProducerRecord<>(
                     TOPIC, keys[index], Instant.now().toString());
