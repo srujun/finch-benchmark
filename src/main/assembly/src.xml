@@ -21,6 +21,7 @@
             <directory>${basedir}/src/main/config</directory>
             <includes>
                 <include>*.properties</include>
+                <include>*.json</include>
             </includes>
             <outputDirectory>config</outputDirectory>
             <!-- filtered=true, so we do variable expansion so the yarn package path
@@ -32,6 +33,11 @@
         <file>
             <source>${basedir}/src/main/resources/log4j.xml</source>
             <outputDirectory>lib</outputDirectory>
+        </file>
+        <file>
+            <source>${basedir}/src/main/resources/run-workload.sh</source>
+            <outputDirectory>bin</outputDirectory>
+            <fileMode>0744</fileMode>
         </file>
         <!--<file>-->
             <!--<source>${basedir}/bin/run-wikipedia-zk-application.sh</source>-->

@@ -61,5 +61,5 @@ task distTar(dependsOn: build, type: Tar) {
 task runSimpleWrite(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     main = 'streambench.SimpleWrite'
-    args = ["$arg1"]
+    args = ["1.2"]
 }

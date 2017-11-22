@@ -6,13 +6,15 @@ import org.apache.samza.operators.KV;
 import org.apache.samza.operators.MessageStream;
 import org.apache.samza.operators.OutputStream;
 import org.apache.samza.operators.StreamGraph;
-import org.apache.samza.serializers.KVSerde;
-import org.apache.samza.serializers.StringSerde;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Random;
 
 
 public class BenchmarkApplication implements StreamApplication {
+
+    private static final Logger logger = LoggerFactory.getLogger(BenchmarkApplication.class);
 
     // Inputs
     private static final String RAND_INPUT_STREAM_ID = "rand-input";
@@ -22,9 +24,13 @@ public class BenchmarkApplication implements StreamApplication {
 
     private Random rand;
 
+    public BenchmarkApplication() {
+
+    }
+
     @Override
     public void init(StreamGraph graph, Config config) {
-        graph.setDefaultSerde(KVSerde.of(new StringSerde(), new StringSerde()));
+//        graph.setDefaultSerde(KVSerde.of(new StringSerde(), new StringSerde()));
 
         // Input message stream
         MessageStream<KV<String, String>> randomInputStream = graph.getInputStream(RAND_INPUT_STREAM_ID);
@@ -36,7 +42,11 @@ public class BenchmarkApplication implements StreamApplication {
         rand.setSeed(7762);
 
         randomInputStream
-                .filter(s -> rand.nextBoolean())
+                .map(kv -> {
+                    logger.info("Got: " + kv.getKey() + ":" + kv.getValue());
+                    return kv;
+                })
+                .filter(kv -> rand.nextBoolean())
                 .sendTo(randomOutputStream);
     }
 
