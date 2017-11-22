@@ -2,6 +2,7 @@ package streambench.workload;
 
 import com.google.gson.Gson;
 import streambench.system.BenchmarkMessageFactory;
+import streambench.workload.pojo.WorkloadConfig;
 
 import java.io.FileReader;
 import java.util.HashMap;
@@ -15,21 +16,30 @@ public class WorkloadParser {
         Gson gson = new Gson();
         WorkloadConfig workloadConfig = gson.fromJson(workloadFile, WorkloadConfig.class);
 
-        for(WorkloadSource src : workloadConfig.getSources()) {
-            String key = "systems." + src.getName() + ".samza.factory";
-            options.put(key, BenchmarkMessageFactory.class.getCanonicalName());
+        workloadConfig.getSources().forEach(
+            (name, src) -> {
+                System.out.println("keydist=" + src.getKey_dist_params());
+                String key;
+                String systemName = name + "-system";
 
-            key = "streams." + src.getName() + ".samza.key.serde";
-            options.put(key, "string");
+                key = "systems." + systemName + ".samza.factory";
+                options.put(key, BenchmarkMessageFactory.class.getCanonicalName());
 
+                key = "streams." + name + ".samza.system";
+                options.put(key, systemName);
 
-        }
+                key = "streams." + name + ".samza.key.serde";
+                options.put(key, "string");
+                key = "streams." + name + ".samza.msg.serde";
+                options.put(key, "string");
+            }
+        );
 
         workloadConfig.getTransformations().forEach(
-            (name, operator) -> {
+            (name, transformation) -> {
                 System.out.println("Transformation name: " + name);
-                System.out.println("Transformation operator: " + operator.getOperator());
-                System.out.println("Transformation input: " + operator.getInput());
+                System.out.println("Transformation operator: " + transformation.getOperator());
+                System.out.println("Transformation input: " + transformation.getInput());
             }
         );
 

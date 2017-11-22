@@ -1,8 +1,8 @@
-package streambench.workload;
+package streambench.workload.pojo;
 
 import java.util.Map;
 
-public class WorkloadOperator {
+public class WorkloadTransformation {
 
     private String operator;
     private String input;

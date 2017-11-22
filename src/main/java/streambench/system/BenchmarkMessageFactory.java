@@ -18,7 +18,20 @@ public class BenchmarkMessageFactory implements SystemFactory {
     @Override
     public SystemConsumer getConsumer(String systemName, Config config, MetricsRegistry metricsRegistry) {
         logger.info("Getting BenchmarkMessageFactory consumer");
-        return new BenchmarkInputMessageConsumer(systemName, config.subset("streambench.workload." + systemName));
+        SystemConsumer benchmarkSystemConsumer;
+
+        try {
+            benchmarkSystemConsumer = new BenchmarkInputMessageConsumer(systemName, config);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("Could not create BenchmarkInputMessageConsumer: " + e.getMessage());
+            for(StackTraceElement ste : e.getStackTrace())
+                logger.error(ste.toString());
+
+            throw new SamzaException("Error creating BenchmarkInputMessageConsumer");
+        }
+
+        return benchmarkSystemConsumer;
     }
 
     @Override

@@ -4,6 +4,7 @@ import joptsimple.OptionSet;
 import org.apache.samza.SamzaException;
 import org.apache.samza.application.StreamApplication;
 import org.apache.samza.config.Config;
+import org.apache.samza.config.MapConfig;
 import org.apache.samza.runtime.ApplicationRunner;
 import org.apache.samza.runtime.ApplicationRunnerMain;
 import org.apache.samza.runtime.ApplicationRunnerOperation;
@@ -13,7 +14,9 @@ import streambench.workload.WorkloadParser;
 import java.io.File;
 import java.io.FileReader;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class BenchmarkApplicationMain extends ApplicationRunnerMain {
@@ -42,12 +45,15 @@ public class BenchmarkApplicationMain extends ApplicationRunnerMain {
 
         // inject the workload parameters
         Map<String, String> workloadOptions = WorkloadParser.getWorklaodOptions(new FileReader(workloadFile));
-        Map<String, String> configCopy = new HashMap<>(config);
-        configCopy.putAll(workloadOptions);
 
-        ApplicationRunner runner = ApplicationRunner.fromConfig(config);
-////        StreamApplication app =
-////                (StreamApplication) Class.forName(config.get(STREAM_APPLICATION_CLASS_CONFIG)).newInstance();
+        List<Map<String, String>> allConfigs = new ArrayList<>();
+        allConfigs.add(config);
+        allConfigs.add(workloadOptions);
+
+        MapConfig finalConfig = new MapConfig(allConfigs);
+
+        ApplicationRunner runner = ApplicationRunner.fromConfig(finalConfig);
+//        StreamApplication app = (StreamApplication) Class.forName(config.get(STREAM_APPLICATION_CLASS_CONFIG)).newInstance();
         BenchmarkApplication app = new BenchmarkApplication();
         switch (op) {
             case RUN:

@@ -1,11 +1,8 @@
-package streambench.workload;
+package streambench.workload.pojo;
 
 import java.util.Map;
 
 public class WorkloadSource {
-
-    private String name;
-    private int num_keys;
 
     private String key_dist;
     private Map<String, Object> key_dist_params;
@@ -15,22 +12,6 @@ public class WorkloadSource {
 
     private String rate_dist;
     private Map<String, Object> rate_dist_params;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getNum_keys() {
-        return num_keys;
-    }
-
-    public void setNum_keys(int num_keys) {
-        this.num_keys = num_keys;
-    }
 
     public String getKey_dist() {
         return key_dist;
