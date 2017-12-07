@@ -51,6 +51,9 @@ public class BenchmarkApplicationMain extends ApplicationRunnerMain {
         allConfigs.add(workloadOptions);
 
         MapConfig finalConfig = new MapConfig(allConfigs);
+        finalConfig.forEach(
+            (k, v) -> System.out.println("Final Config: " + k + "=" + v)
+        );
 
         ApplicationRunner runner = ApplicationRunner.fromConfig(finalConfig);
 //        StreamApplication app = (StreamApplication) Class.forName(config.get(STREAM_APPLICATION_CLASS_CONFIG)).newInstance();

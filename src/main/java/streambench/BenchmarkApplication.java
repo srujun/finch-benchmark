@@ -8,30 +8,21 @@ import org.apache.samza.operators.KV;
 import org.apache.samza.operators.MessageStream;
 import org.apache.samza.operators.OutputStream;
 import org.apache.samza.operators.StreamGraph;
-import org.apache.samza.operators.functions.FoldLeftFunction;
-import org.apache.samza.operators.windows.WindowPane;
-import org.apache.samza.operators.windows.Windows;
-import org.apache.samza.serializers.StringSerde;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import streambench.workload.transformations.WorkloadOperation;
 import streambench.workload.pojo.WorkloadConfig;
 
 import java.io.FileReader;
 import java.net.URI;
-import java.time.Duration;
 import java.util.*;
-import java.util.function.Supplier;
 
 
 public class BenchmarkApplication implements StreamApplication {
 
     private static final Logger logger = LoggerFactory.getLogger(BenchmarkApplication.class);
-    private static final long SLEEP_DURATION = 500; // 0.5 second
-    private static final double SLEEP_LOAD = 0.8;
     /* load generation reference: https://caffinc.github.io/2016/03/cpu-load-generator/ */
     private static final String WORKLOAD_FILE_KEY = "streambench.workload.path";
-
-    private Random rand;
 
     @Override
     public void init(StreamGraph graph, Config config) {
@@ -40,17 +31,16 @@ public class BenchmarkApplication implements StreamApplication {
             Gson gson = new Gson();
             WorkloadConfig workloadConfig = gson.fromJson(new FileReader(workloadFilePath), WorkloadConfig.class);
 
-            rand = new Random();
-            rand.setSeed(7762);
-
-            Map<String, MessageStream<KV<String, String>>> inputStreams = new HashMap<>();
+            Map<String, MessageStream<KV<String, String>>> msgStreams = new HashMap<>();
+//            Map<String, MessageStream<KV<String, String>>> dependentStreams = new HashMap<>();
 //            Map<String, OutputStream<KV<String, String>>> outputStreams = new HashMap<>();
+
             Set<String> dependentStreamsSet = new HashSet<>();
             Set<String> outputStreamsSet = new HashSet<>();
 
             // Input message streams
             workloadConfig.getSources().forEach(
-                (name, source) -> inputStreams.put(name, graph.getInputStream(name))
+                (name, source) -> msgStreams.put(name, graph.getInputStream(name))
             );
 
             // Find which transformations have an outgoing edge
@@ -60,37 +50,35 @@ public class BenchmarkApplication implements StreamApplication {
                 }
             );
 
-            logger.info("init input streams=" + inputStreams.keySet());
+            logger.info("init streams=" + msgStreams.keySet());
             logger.info("dependent streams=" + dependentStreamsSet);
 
-            // Apply the tranformations
             workloadConfig.getTransformations().forEach(
                 (name, transformation) -> {
-                    MessageStream<KV<String, String>> input = inputStreams.get(transformation.getInput());
-                    switch (transformation.getOperator()) {
-                        case "filter":
-                            inputStreams.put(name, input
-                                    .map(kv -> {
-                                        long startTime = System.currentTimeMillis();
-                                        try {
-                                            while (System.currentTimeMillis() - startTime < SLEEP_DURATION)
-                                                Thread.sleep((long) Math.floor((1 - SLEEP_LOAD) * 100));
-                                        } catch (InterruptedException e) {
+                    String srcStreamName = transformation.getInput();
+                    logger.info("Trying to set up " + srcStreamName + "->" + name);
 
-                                        }
-                                        return kv;
-                                    })
-                                    .filter(msg -> rand.nextBoolean()));
-                            break;
-                        default: logger.warn("Unknown operator: " + transformation.getOperator());
+                    if(!msgStreams.containsKey(srcStreamName)) {
+                        // srcStream hasn't been defined yet
+                        logger.error("Stream " + srcStreamName + " has not been defined!");
+                        return;
+                    }
+                    MessageStream<KV<String, String>> srcStream = msgStreams.get(srcStreamName);
+
+                    // apply the transformation
+                    List<MessageStream<KV<String, String>>> outStreams = WorkloadOperation.apply(transformation, srcStream);
+                    if(outStreams.size() > 1) {
+                        for (int idx = 0; idx < outStreams.size(); idx++) {
+                            msgStreams.put(name + "__" + (idx + 1), outStreams.get(idx));
+                        }
+                    } else {
+                        msgStreams.put(name, outStreams.get(0));
                     }
                 }
             );
 
-            logger.info("final input streams=" + inputStreams.keySet());
-
             // create output streams
-            outputStreamsSet.addAll(inputStreams.keySet());
+            outputStreamsSet.addAll(msgStreams.keySet());
             outputStreamsSet.removeAll(dependentStreamsSet);
             logger.info("output streams=" + outputStreamsSet);
 
@@ -98,18 +86,9 @@ public class BenchmarkApplication implements StreamApplication {
             outputStreamsSet.forEach(
                 name -> {
                     OutputStream<KV<String, String>> oStream = graph.getOutputStream(name);
-                    inputStreams.get(name).sendTo(oStream);
+                    msgStreams.get(name).sendTo(oStream);
                 }
             );
-
-//            MessageStream<KV<String, String>> randomInputStream = graph.getInputStream("rand-input");
-//            OutputStream<KV<String, String>> randomOutputStream = graph.getOutputStream("rand-output");
-//            OutputStream<String> statsStream = graph.getOutputStream("_streambench-stats", new StringSerde());
-//
-//            randomInputStream
-//                    .filter(kv -> rand.nextBoolean())
-//                    .sendTo(randomOutputStream);
-
         } catch (Exception e) {
             e.printStackTrace();
             logger.error("Could not create stream graph: " + e.getMessage());

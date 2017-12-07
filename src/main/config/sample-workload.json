@@ -26,11 +26,18 @@
         "p": 0.5
       }
     },
-    "rand-output": {
-      "operator": "filter",
+    "split1": {
+      "operator": "split",
       "input": "filter1",
       "params": {
-        "p": 0.5
+        "n": 2
+      }
+    },
+    "rand-output": {
+      "operator": "filter",
+      "input": "split1__2",
+      "params": {
+        "p": 0.9
       }
     }
   }
