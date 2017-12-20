@@ -13,7 +13,8 @@ import java.util.Random;
 public class ModifyOp extends WorkloadOperation {
 
     private static final Logger logger = LoggerFactory.getLogger(FilterOp.class);
-    private static final String PARAM_RATIO = "ratio";
+    private static final String PARAM_RATE_RATIO = "rate_ratio";
+    private static final String PARAM_SIZE_RATIO = "size_ratio";
 
     private static Random rand;
 
@@ -26,7 +27,7 @@ public class ModifyOp extends WorkloadOperation {
 
     public ModifyOp(WorkloadTransformation transformation) {
         super(transformation);
-        this.ratio = (double) transformation.getParams().getOrDefault(PARAM_RATIO, 1f);
+        this.ratio = (double) transformation.getParams().getOrDefault(PARAM_RATE_RATIO, 1f);
 
         logger.info("New modify operation with ratio=" + ratio);
     }
