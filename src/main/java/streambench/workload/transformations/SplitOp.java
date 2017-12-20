@@ -24,10 +24,14 @@ public class SplitOp extends WorkloadOperation {
         if(numOutputStreams < 1) {
             throw new SamzaException("Cannot split to non-positive number of output streams");
         }
+
+        logger.info("New split operation with numOutputStreams=" + numOutputStreams);
     }
 
     @Override
-    public ArrayList<MessageStream<KV<String, String>>> apply(MessageStream<KV<String, String>> srcStream) {
+    public ArrayList<MessageStream<KV<String, String>>> apply(List<MessageStream<KV<String, String>>> srcStreams) {
+        MessageStream<KV<String, String>> srcStream = srcStreams.get(0);
+
         ArrayList<MessageStream<KV<String, String>>> outStreams = new ArrayList<>();
 
         for(int idx = 0; idx < numOutputStreams; idx++) {

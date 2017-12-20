@@ -11,7 +11,9 @@ import streambench.workload.pojo.WorkloadSink;
 import streambench.workload.pojo.WorkloadStream;
 
 import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class WorkloadParser {
@@ -50,7 +52,10 @@ public class WorkloadParser {
             (name, transformation) -> {
                 System.out.println("Transformation name: " + name);
                 System.out.println("Transformation operator: " + transformation.getOperator());
-                System.out.println("Transformation input: " + transformation.getInput());
+                if(transformation.getInput() != null)
+                    System.out.println("Transformation input: " + transformation.getInput());
+                else
+                    System.out.println("Transformation inputs: " + transformation.getInputs());
             }
         );
 
@@ -60,24 +65,33 @@ public class WorkloadParser {
     public static ImmutableNetwork<String, String> getWorkloadAsNetwork(FileReader workloadFile) {
         WorkloadConfig workloadConfig = WorkloadParser.getWorkloadConfig(workloadFile);
 
-        MutableNetwork<String, String> network = NetworkBuilder.directed().build();
+        MutableNetwork<String, String> network = NetworkBuilder.directed().allowsSelfLoops(true).build();
 
         workloadConfig.getSources().forEach((name, src) -> network.addNode(name));
         workloadConfig.getSinks().forEach(network::addNode);
 
         workloadConfig.getTransformations().forEach(
             (name, transformation) -> {
-                String srcStreamName = transformation.getInput();
-                if(srcStreamName.contains("__"))
-                    srcStreamName = srcStreamName.substring(0, srcStreamName.lastIndexOf("__"));
+                List<String> streamInputs = new ArrayList<>();
 
-                network.addEdge(srcStreamName, name, transformation.getInput());
+                if(transformation.getInput() != null)
+                    streamInputs.add(transformation.getInput());
+                else
+                    streamInputs.addAll(transformation.getInputs());
 
-                if(transformation.getOutputs() != null) {
-                    for(String outputName : transformation.getOutputs()) {
-                        if(workloadConfig.getSinks().contains(outputName)) {
-                            // the output is a sink
-                            network.addEdge(name, outputName, outputName);
+                for(String srcStreamName : streamInputs) {
+                    String srcNode = srcStreamName;
+                    if (srcNode.contains("__"))
+                        srcNode = srcNode.substring(0, srcNode.lastIndexOf("__"));
+
+                    network.addEdge(srcNode, name, srcStreamName);
+
+                    if (transformation.getOutputs() != null) {
+                        for (String outputName : transformation.getOutputs()) {
+                            if (workloadConfig.getSinks().contains(outputName)) {
+                                // the output is a sink
+                                network.addEdge(name, outputName, outputName);
+                            }
                         }
                     }
                 }

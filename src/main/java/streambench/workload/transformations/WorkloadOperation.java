@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import streambench.workload.pojo.WorkloadTransformation;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public abstract class WorkloadOperation {
 
@@ -18,11 +19,12 @@ public abstract class WorkloadOperation {
 
     protected WorkloadTransformation transformation;
 
-    public static ArrayList<MessageStream<KV<String, String>>> apply(WorkloadTransformation transformation, MessageStream<KV<String, String>> srcStream) {
+    public static ArrayList<MessageStream<KV<String, String>>> apply(WorkloadTransformation transformation, List<MessageStream<KV<String, String>>> srcStreams) {
         switch (transformation.getOperator()) {
-            case "filter": return new FilterOp(transformation).apply(srcStream);
-            case "split": return new SplitOp(transformation).apply(srcStream);
-            case "modify": return new ModifyOp(transformation).apply(srcStream);
+            case "filter": return new FilterOp(transformation).apply(srcStreams);
+            case "split": return new SplitOp(transformation).apply(srcStreams);
+            case "modify": return new ModifyOp(transformation).apply(srcStreams);
+            case "merge": return new MergeOp(transformation).apply(srcStreams);
         }
 
         logger.error("Unknown operator: " + transformation.getOperator());
@@ -33,5 +35,5 @@ public abstract class WorkloadOperation {
         this.transformation = transformation;
     }
 
-    public abstract ArrayList<MessageStream<KV<String, String>>> apply(MessageStream<KV<String, String>> srcStream);
+    public abstract ArrayList<MessageStream<KV<String, String>>> apply(List<MessageStream<KV<String, String>>> srcStream);
 }

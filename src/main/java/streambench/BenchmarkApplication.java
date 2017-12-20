@@ -34,6 +34,7 @@ public class BenchmarkApplication implements StreamApplication {
             Network<String, String> workloadNetwork = WorkloadParser.getWorkloadAsNetwork(new FileReader(workloadFilePath));
 
             Map<String, MessageStream<KV<String, String>>> msgStreams = new HashMap<>();
+            Set<String> seenTransformations = new HashSet<>();
 
             workloadConfig.getSources().forEach(
                 (srcname, sourceObj) -> {
@@ -44,23 +45,33 @@ public class BenchmarkApplication implements StreamApplication {
                     Queue<String> transformations = new LinkedList<>();
                     transformations.addAll(workloadNetwork.successors(srcname));
 
+                    // BFS Traversal
                     while(!transformations.isEmpty()) {
                         String name = transformations.remove();
                         logger.info("Transformation: " + name);
+                        if(seenTransformations.contains(name)) {
+                            logger.warn("Have seen, will skip...");
+                            continue;
+                        }
+                        seenTransformations.add(name);
 
                         WorkloadTransformation transformation = workloadConfig.getTransformations().get(name);
                         if(transformation == null) {
-                            logger.info("Is null, will skip...");
+                            logger.warn("Is null, will skip...");
                             continue;
                         }
 
-                        String srcStreamName = transformation.getInput();
-                        logger.info("Src: " + srcStreamName);
-                        MessageStream<KV<String, String>> srcStream = msgStreams.get(srcStreamName);
+                        List<MessageStream<KV<String, String>>> srcStreams = new ArrayList<>();
+                        for(String pred : workloadNetwork.predecessors(name)) {
+                            String streamName = workloadNetwork.edgeConnecting(pred, name).get();
+                            logger.info("Src: " + pred + " streamName: " + streamName);
+                            srcStreams.add(msgStreams.get(streamName));
+                        }
 
                         // apply the transformation
-                        ArrayList<MessageStream<KV<String, String>>> outStreams = WorkloadOperation.apply(transformation, srcStream);
-                        if(outStreams.size() > 1) {
+                        ArrayList<MessageStream<KV<String, String>>> outStreams = WorkloadOperation.apply(transformation, srcStreams);
+
+                        if (outStreams.size() > 1) {
                             for (int idx = 0; idx < outStreams.size(); idx++) {
                                 msgStreams.put(transformation.getOutputs().get(idx), outStreams.get(idx));
                                 logger.info("Putting transformation output " + transformation.getOutputs().get(idx));

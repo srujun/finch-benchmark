@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import streambench.workload.pojo.WorkloadTransformation;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class FilterOp extends WorkloadOperation {
@@ -31,7 +32,9 @@ public class FilterOp extends WorkloadOperation {
     }
 
     @Override
-    public ArrayList<MessageStream<KV<String, String>>> apply(MessageStream<KV<String, String>> srcStream) {
+    public ArrayList<MessageStream<KV<String, String>>> apply(List<MessageStream<KV<String, String>>> srcStreams) {
+        MessageStream<KV<String, String>> srcStream = srcStreams.get(0);
+
         MessageStream<KV<String, String>> outStream =
                 srcStream.filter(msg -> (rand.nextDouble() <= dropProbability));
         ArrayList<MessageStream<KV<String, String>>> list = new ArrayList<>();

@@ -32,7 +32,9 @@ public class ModifyOp extends WorkloadOperation {
     }
 
     @Override
-    public ArrayList<MessageStream<KV<String, String>>> apply(MessageStream<KV<String, String>> srcStream) {
+    public ArrayList<MessageStream<KV<String, String>>> apply(List<MessageStream<KV<String, String>>> srcStreams) {
+        MessageStream<KV<String, String>> srcStream = srcStreams.get(0);
+
         MessageStream<KV<String, String>> outStream =
             srcStream.flatMap(msg -> {
                 List<KV<String, String>> outMsgs = new ArrayList<>();
