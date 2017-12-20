@@ -55,6 +55,9 @@ public class BenchmarkApplicationMain extends ApplicationRunnerMain {
             (k, v) -> System.out.println("Final Config: " + k + "=" + v)
         );
 
+        System.out.println("Network:");
+        System.out.println(WorkloadParser.getWorkloadAsNetwork(new FileReader(workloadFile)).toString());
+
         ApplicationRunner runner = ApplicationRunner.fromConfig(finalConfig);
 //        StreamApplication app = (StreamApplication) Class.forName(config.get(STREAM_APPLICATION_CLASS_CONFIG)).newInstance();
         BenchmarkApplication app = new BenchmarkApplication();

@@ -7,33 +7,47 @@ import org.slf4j.LoggerFactory;
 import streambench.workload.pojo.WorkloadTransformation;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
-public class FilterOp extends WorkloadOperation {
+public class ModifyOp extends WorkloadOperation {
 
     private static final Logger logger = LoggerFactory.getLogger(FilterOp.class);
-    private static final String PARAM_P = "p";
+    private static final String PARAM_RATIO = "ratio";
 
     private static Random rand;
 
-    private double dropProbability;
+    private double ratio;
 
     static {
         rand = new Random();
         rand.setSeed(7762);
     }
 
-    public FilterOp(WorkloadTransformation transformation) {
+    public ModifyOp(WorkloadTransformation transformation) {
         super(transformation);
-        this.dropProbability = (double) transformation.getParams().getOrDefault(PARAM_P, 0.5);
+        this.ratio = (double) transformation.getParams().getOrDefault(PARAM_RATIO, 1f);
 
-        logger.info("New filter operation with prob=" + dropProbability);
+        logger.info("New modify operation with ratio=" + ratio);
     }
 
     @Override
     public ArrayList<MessageStream<KV<String, String>>> apply(MessageStream<KV<String, String>> srcStream) {
         MessageStream<KV<String, String>> outStream =
-                srcStream.filter(msg -> (rand.nextDouble() <= dropProbability));
+            srcStream.flatMap(msg -> {
+                List<KV<String, String>> outMsgs = new ArrayList<>();
+                for(int i = 0; i < (int) ratio; i++) {
+                    outMsgs.add(msg);
+                }
+
+                double probability = ratio - Math.floor(ratio);
+                if(rand.nextDouble() <= probability)
+                    outMsgs.add(msg);
+
+                return outMsgs;
+            }
+        );
+
         ArrayList<MessageStream<KV<String, String>>> list = new ArrayList<>();
         list.add(outStream);
         return list;

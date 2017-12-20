@@ -1,6 +1,6 @@
 package streambench;
 
-import com.google.gson.Gson;
+import com.google.common.graph.Network;
 import org.apache.samza.SamzaException;
 import org.apache.samza.application.StreamApplication;
 import org.apache.samza.config.Config;
@@ -10,6 +10,8 @@ import org.apache.samza.operators.OutputStream;
 import org.apache.samza.operators.StreamGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import streambench.workload.WorkloadParser;
+import streambench.workload.pojo.WorkloadTransformation;
 import streambench.workload.transformations.WorkloadOperation;
 import streambench.workload.pojo.WorkloadConfig;
 
@@ -28,62 +30,55 @@ public class BenchmarkApplication implements StreamApplication {
     public void init(StreamGraph graph, Config config) {
         try {
             String workloadFilePath = new URI(config.get(WORKLOAD_FILE_KEY)).getPath();
-            Gson gson = new Gson();
-            WorkloadConfig workloadConfig = gson.fromJson(new FileReader(workloadFilePath), WorkloadConfig.class);
+            WorkloadConfig workloadConfig = WorkloadParser.getWorkloadConfig(new FileReader(workloadFilePath));
+            Network<String, String> workloadNetwork = WorkloadParser.getWorkloadAsNetwork(new FileReader(workloadFilePath));
 
             Map<String, MessageStream<KV<String, String>>> msgStreams = new HashMap<>();
-//            Map<String, MessageStream<KV<String, String>>> dependentStreams = new HashMap<>();
-//            Map<String, OutputStream<KV<String, String>>> outputStreams = new HashMap<>();
 
-            Set<String> dependentStreamsSet = new HashSet<>();
-            Set<String> outputStreamsSet = new HashSet<>();
-
-            // Input message streams
             workloadConfig.getSources().forEach(
-                (name, source) -> msgStreams.put(name, graph.getInputStream(name))
-            );
+                (srcname, sourceObj) -> {
+                    logger.info("Source stream: " + srcname);
+                    // Input message streams
+                    msgStreams.put(srcname, graph.getInputStream(srcname));
 
-            // Find which transformations have an outgoing edge
-            workloadConfig.getTransformations().forEach(
-                (name, transformation) -> {
-                    dependentStreamsSet.add(transformation.getInput());
-                }
-            );
+                    Queue<String> transformations = new LinkedList<>();
+                    transformations.addAll(workloadNetwork.successors(srcname));
 
-            logger.info("init streams=" + msgStreams.keySet());
-            logger.info("dependent streams=" + dependentStreamsSet);
+                    while(!transformations.isEmpty()) {
+                        String name = transformations.remove();
+                        logger.info("Transformation: " + name);
 
-            workloadConfig.getTransformations().forEach(
-                (name, transformation) -> {
-                    String srcStreamName = transformation.getInput();
-                    logger.info("Trying to set up " + srcStreamName + "->" + name);
-
-                    if(!msgStreams.containsKey(srcStreamName)) {
-                        // srcStream hasn't been defined yet
-                        logger.error("Stream " + srcStreamName + " has not been defined!");
-                        return;
-                    }
-                    MessageStream<KV<String, String>> srcStream = msgStreams.get(srcStreamName);
-
-                    // apply the transformation
-                    List<MessageStream<KV<String, String>>> outStreams = WorkloadOperation.apply(transformation, srcStream);
-                    if(outStreams.size() > 1) {
-                        for (int idx = 0; idx < outStreams.size(); idx++) {
-                            msgStreams.put(name + "__" + (idx + 1), outStreams.get(idx));
+                        WorkloadTransformation transformation = workloadConfig.getTransformations().get(name);
+                        if(transformation == null) {
+                            logger.info("Is null, will skip...");
+                            continue;
                         }
-                    } else {
-                        msgStreams.put(name, outStreams.get(0));
+
+                        String srcStreamName = transformation.getInput();
+                        logger.info("Src: " + srcStreamName);
+                        MessageStream<KV<String, String>> srcStream = msgStreams.get(srcStreamName);
+
+                        // apply the transformation
+                        ArrayList<MessageStream<KV<String, String>>> outStreams = WorkloadOperation.apply(transformation, srcStream);
+                        if(outStreams.size() > 1) {
+                            for (int idx = 0; idx < outStreams.size(); idx++) {
+                                msgStreams.put(transformation.getOutputs().get(idx), outStreams.get(idx));
+                                logger.info("Putting transformation output " + transformation.getOutputs().get(idx));
+                            }
+                        } else {
+                            msgStreams.put(name, outStreams.get(0));
+                            logger.info("Putting transformation output " + name);
+                        }
+
+                        // add the successors to the queue
+                        logger.info("successors(" + name + "): " + workloadNetwork.successors(name));
+                        transformations.addAll(workloadNetwork.successors(name));
                     }
                 }
             );
-
-            // create output streams
-            outputStreamsSet.addAll(msgStreams.keySet());
-            outputStreamsSet.removeAll(dependentStreamsSet);
-            logger.info("output streams=" + outputStreamsSet);
 
             // Send to outputstreams
-            outputStreamsSet.forEach(
+            workloadConfig.getSinks().forEach(
                 name -> {
                     OutputStream<KV<String, String>> oStream = graph.getOutputStream(name);
                     msgStreams.get(name).sendTo(oStream);

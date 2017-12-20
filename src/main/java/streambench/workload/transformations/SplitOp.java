@@ -27,8 +27,8 @@ public class SplitOp extends WorkloadOperation {
     }
 
     @Override
-    public List<MessageStream<KV<String, String>>> apply(MessageStream<KV<String, String>> srcStream) {
-        List<MessageStream<KV<String, String>>> outStreams = new ArrayList<>();
+    public ArrayList<MessageStream<KV<String, String>>> apply(MessageStream<KV<String, String>> srcStream) {
+        ArrayList<MessageStream<KV<String, String>>> outStreams = new ArrayList<>();
 
         for(int idx = 0; idx < numOutputStreams; idx++) {
             int finalIdx = idx;

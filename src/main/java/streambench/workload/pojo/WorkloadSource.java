@@ -2,7 +2,7 @@ package streambench.workload.pojo;
 
 import java.util.Map;
 
-public class WorkloadSource {
+public class WorkloadSource extends WorkloadNode {
 
     private String key_dist;
     private Map<String, Object> key_dist_params;

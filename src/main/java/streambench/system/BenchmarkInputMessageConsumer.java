@@ -69,18 +69,22 @@ public class BenchmarkInputMessageConsumer extends BlockingEnvelopeMap implement
         /* TODO: works only for ZipfDistribution */
         Constructor keyDistCtor = Class.forName(streamSrc.getKey_dist()).getConstructor(int.class, double.class);
         keyDist = (ZipfDistribution) keyDistCtor.newInstance(
-                ((Double) streamSrc.getKey_dist_params().get("num_keys")).intValue(), streamSrc.getKey_dist_params().get("exponent"));
+                ((Double) streamSrc.getKey_dist_params().get("num_keys")).intValue(),
+                streamSrc.getKey_dist_params().get("exponent")
+        );
 
         /* TODO: works only for UniformIntegerDistribution */
         Constructor msgLenDistCtor = Class.forName(streamSrc.getMsg_dist()).getConstructor(int.class, int.class);
         msgLenDist = (UniformIntegerDistribution) msgLenDistCtor.newInstance(
-                ((Double) streamSrc.getMsg_dist_params().get("lower")).intValue(), ((Double) streamSrc.getMsg_dist_params().get("upper")).intValue());
+                ((Double) streamSrc.getMsg_dist_params().get("lower")).intValue(),
+                ((Double) streamSrc.getMsg_dist_params().get("upper")).intValue()
+        );
 
 //        /* TODO: works only for UniformIntegerDistribution */
 //        Constructor rateDistCtor = Class.forName(streamSrc.getRate_dist()).getConstructor(int.class, int.class);
 //        keyDist = (UniformIntegerDistribution) rateDistCtor.newInstance(
 //                streamSrc.getRate_dist_params().get("lower"), streamSrc.getRate_dist_params().get("upper"));
-        rate = ((Double) streamSrc.getRate_dist_params().get("lower")).intValue();
+        rate = ((Double) streamSrc.getRate_dist_params().get("rate")).intValue();
 
         this.messageEmitter = new MessageEmitter(this);
         this.schedulerService = Executors.newSingleThreadScheduledExecutor();

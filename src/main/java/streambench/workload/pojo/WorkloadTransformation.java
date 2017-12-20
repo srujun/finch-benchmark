@@ -1,12 +1,14 @@
 package streambench.workload.pojo;
 
+import java.util.List;
 import java.util.Map;
 
-public class WorkloadTransformation {
+public class WorkloadTransformation extends WorkloadNode {
 
     private String operator;
     private String input;
     private Map<String, Object> params;
+    private List<String> outputs;
 
     public String getOperator() {
         return operator;
@@ -30,5 +32,13 @@ public class WorkloadTransformation {
 
     public void setParams(Map<String, Object> params) {
         this.params = params;
+    }
+
+    public List<String> getOutputs() {
+        return outputs;
+    }
+
+    public void setOutputs(List<String> outputs) {
+        this.outputs = outputs;
     }
 }
