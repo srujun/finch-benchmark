@@ -21,7 +21,7 @@
     <properties>
         <!-- maven specific properties -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <samza.version>0.13.1-SNAPSHOT</samza.version>
+        <samza.version>0.14.0</samza.version>
         <kafka.version>0.10.1.1</kafka.version>
         <hadoop.version>2.6.1</hadoop.version>
     </properties>
