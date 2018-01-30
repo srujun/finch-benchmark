@@ -9,20 +9,18 @@ import streambench.workload.pojo.WorkloadTransformation;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MergeOp extends WorkloadOperation {
+public class WindowOp extends WorkloadOperation {
 
-    private static final Logger logger = LoggerFactory.getLogger(MergeOp.class);
+    private static final Logger logger = LoggerFactory.getLogger(WindowOp.class);
 
-    public MergeOp(String name, WorkloadTransformation transformation) {
+    public WindowOp(String name, WorkloadTransformation transformation) {
         super(name, transformation);
 
-        logger.info("New merge operation");
+        logger.info("New window operation");
     }
 
     @Override
     public ArrayList<MessageStream<KV<String, String>>> apply(List<MessageStream<KV<String, String>>> srcStreams) {
-        ArrayList<MessageStream<KV<String, String>>> outStreams = new ArrayList<>();
-        outStreams.add(MessageStream.mergeAll(srcStreams));
-        return outStreams;
+        return null;
     }
 }

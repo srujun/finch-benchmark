@@ -27,6 +27,14 @@ public class WorkloadTransformation extends WorkloadNode {
         this.input = input;
     }
 
+    public List<String> getInputs() {
+        return inputs;
+    }
+
+    public void setInputs(List<String> inputs) {
+        this.inputs = inputs;
+    }
+
     public Map<String, Object> getParams() {
         return params;
     }
@@ -41,13 +49,5 @@ public class WorkloadTransformation extends WorkloadNode {
 
     public void setOutputs(List<String> outputs) {
         this.outputs = outputs;
-    }
-
-    public List<String> getInputs() {
-        return inputs;
-    }
-
-    public void setInputs(List<String> inputs) {
-        this.inputs = inputs;
     }
 }

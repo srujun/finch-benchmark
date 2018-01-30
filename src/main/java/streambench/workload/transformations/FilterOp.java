@@ -24,8 +24,8 @@ public class FilterOp extends WorkloadOperation {
         rand.setSeed(7762);
     }
 
-    public FilterOp(WorkloadTransformation transformation) {
-        super(transformation);
+    public FilterOp(String name, WorkloadTransformation transformation) {
+        super(name, transformation);
         this.dropProbability = (double) transformation.getParams().getOrDefault(PARAM_P, 0.5);
 
         logger.info("New filter operation with prob=" + dropProbability);

@@ -147,7 +147,7 @@ public class WorkloadParser {
                             }
 
                             // apply the transformation
-                            ArrayList<MessageStream<KV<String, String>>> outStreams = WorkloadOperation.apply(transformation, srcStreams);
+                            ArrayList<MessageStream<KV<String, String>>> outStreams = WorkloadOperation.apply(name, transformation, srcStreams);
 
                             if (outStreams.size() > 1) {
                                 for (int idx = 0; idx < outStreams.size(); idx++) {

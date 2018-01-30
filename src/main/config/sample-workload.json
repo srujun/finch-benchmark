@@ -46,9 +46,16 @@
       "params": {
         "size_ratio": 0.5
       }
+    },
+    "t5": {
+      "operator": "join",
+      "inputs": ["t3", "t4"],
+      "params": {
+        "ttl": "5s"
+      }
     }
   },
   "sinks": [
-    "t3", "t4"
+    "t5"
   ]
 }

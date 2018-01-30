@@ -25,8 +25,8 @@ public class ModifyOp extends WorkloadOperation {
         rand.setSeed(7762);
     }
 
-    public ModifyOp(WorkloadTransformation transformation) {
-        super(transformation);
+    public ModifyOp(String name, WorkloadTransformation transformation) {
+        super(name, transformation);
         this.ratio = (double) transformation.getParams().getOrDefault(PARAM_RATE_RATIO, 1.0);
 
         logger.info("New modify operation with ratio=" + ratio);
@@ -35,6 +35,8 @@ public class ModifyOp extends WorkloadOperation {
     @Override
     public ArrayList<MessageStream<KV<String, String>>> apply(List<MessageStream<KV<String, String>>> srcStreams) {
         MessageStream<KV<String, String>> srcStream = srcStreams.get(0);
+
+        // TODO: implement size modify
 
         MessageStream<KV<String, String>> outStream =
             srcStream.flatMap(msg -> {

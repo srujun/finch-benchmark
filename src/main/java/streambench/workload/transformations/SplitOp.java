@@ -17,8 +17,8 @@ public class SplitOp extends WorkloadOperation {
 
     private int numOutputStreams;
 
-    public SplitOp(WorkloadTransformation transformation) {
-        super(transformation);
+    public SplitOp(String name, WorkloadTransformation transformation) {
+        super(name, transformation);
         this.numOutputStreams = ((Double) transformation.getParams().getOrDefault(PARAM_N, 0)).intValue();
 
         if(numOutputStreams < 1) {
