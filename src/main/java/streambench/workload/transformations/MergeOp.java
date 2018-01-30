@@ -1,6 +1,5 @@
 package streambench.workload.transformations;
 
-import org.apache.samza.SamzaException;
 import org.apache.samza.operators.KV;
 import org.apache.samza.operators.MessageStream;
 import org.slf4j.Logger;

@@ -43,20 +43,18 @@ public class BenchmarkApplicationMain extends ApplicationRunnerMain {
         if(!config.containsKey(STREAM_APPLICATION_CLASS_CONFIG))
             throw new SamzaException("Samza " + STREAM_APPLICATION_CLASS_CONFIG + " not defined");
 
-        // inject the workload parameters
+        // parse the workload file
         Map<String, String> workloadOptions = WorkloadParser.getWorklaodOptions(new FileReader(workloadFile));
 
+        // combine the stored config and the workload options
         List<Map<String, String>> allConfigs = new ArrayList<>();
         allConfigs.add(config);
         allConfigs.add(workloadOptions);
-
         MapConfig finalConfig = new MapConfig(allConfigs);
+
         finalConfig.forEach(
             (k, v) -> System.out.println("Final Config: " + k + "=" + v)
         );
-
-        System.out.println("Network:");
-        System.out.println(WorkloadParser.getWorkloadAsNetwork(new FileReader(workloadFile)).toString());
 
         ApplicationRunner runner = ApplicationRunner.fromConfig(finalConfig);
 //        StreamApplication app = (StreamApplication) Class.forName(config.get(STREAM_APPLICATION_CLASS_CONFIG)).newInstance();

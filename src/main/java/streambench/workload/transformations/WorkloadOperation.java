@@ -19,19 +19,23 @@ public abstract class WorkloadOperation {
 
     protected WorkloadTransformation transformation;
 
-    public static ArrayList<MessageStream<KV<String, String>>> apply(WorkloadTransformation transformation, List<MessageStream<KV<String, String>>> srcStreams) {
+    public static ArrayList<MessageStream<KV<String, String>>> apply(
+            WorkloadTransformation transformation, List<MessageStream<KV<String, String>>> srcStreams) {
         switch (transformation.getOperator()) {
+            /* STATELESS OPS */
             case "filter": return new FilterOp(transformation).apply(srcStreams);
             case "split": return new SplitOp(transformation).apply(srcStreams);
             case "modify": return new ModifyOp(transformation).apply(srcStreams);
             case "merge": return new MergeOp(transformation).apply(srcStreams);
+
+            /* STATEFUL OPS */
         }
 
         logger.error("Unknown operator: " + transformation.getOperator());
         throw new SamzaException("Unknown operator: " + transformation.getOperator());
     }
 
-    public WorkloadOperation(WorkloadTransformation transformation) {
+    WorkloadOperation(WorkloadTransformation transformation) {
         this.transformation = transformation;
     }
 

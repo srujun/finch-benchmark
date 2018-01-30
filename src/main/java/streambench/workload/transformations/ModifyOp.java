@@ -27,7 +27,7 @@ public class ModifyOp extends WorkloadOperation {
 
     public ModifyOp(WorkloadTransformation transformation) {
         super(transformation);
-        this.ratio = (double) transformation.getParams().getOrDefault(PARAM_RATE_RATIO, 1f);
+        this.ratio = (double) transformation.getParams().getOrDefault(PARAM_RATE_RATIO, 1.0);
 
         logger.info("New modify operation with ratio=" + ratio);
     }
