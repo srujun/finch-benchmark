@@ -26,36 +26,14 @@
       }
     },
     "t2": {
-      "operator": "split",
+      "operator": "modify",
       "input": "t1",
       "params": {
-        "n": 2
-      },
-      "outputs": ["t2__1", "t2__2"]
-    },
-    "t3": {
-      "operator": "filter",
-      "input": "t2__1",
-      "params": {
-        "p": 0.75
-      }
-    },
-    "t4": {
-      "operator": "modify",
-      "input": "t2__2",
-      "params": {
         "size_ratio": 0.5
-      }
-    },
-    "t5": {
-      "operator": "join",
-      "inputs": ["t3", "t4"],
-      "params": {
-        "ttl": "5s"
       }
     }
   },
   "sinks": [
-    "t5"
+    "t2"
   ]
 }

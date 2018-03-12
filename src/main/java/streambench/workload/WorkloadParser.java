@@ -40,11 +40,14 @@ public class WorkloadParser {
                 String key;
                 String systemName = name + "-system";
 
+                /* The following lines will initialize the message producing system */
+                /*
                 key = "systems." + systemName + ".samza.factory";
                 options.put(key, BenchmarkMessageFactory.class.getCanonicalName());
 
                 key = "streams." + name + ".samza.system";
                 options.put(key, systemName);
+                 */
 
                 key = "streams." + name + ".samza.key.serde";
                 options.put(key, "string");
