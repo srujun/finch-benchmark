@@ -1,6 +1,6 @@
 .gradle/
 .vagrant/
-/*.log
+*.log
 .project
 .vscode/
 .settings/

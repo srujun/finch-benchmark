@@ -62,9 +62,3 @@ task distTar(dependsOn: build, type: Tar) {
         from configurations.runtime.artifacts.files
     }
 }
-
-task runSimpleWrite(type: JavaExec) {
-    classpath = sourceSets.main.runtimeClasspath
-    main = 'streambench.SimpleWrite'
-    args = ["1.2"]
-}
