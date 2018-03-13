@@ -106,7 +106,13 @@ public class SimpleProducer {
         toDelete.forEach(topic -> System.out.print(topic + " "));
         System.out.println();
 
-        client.deleteTopics(toDelete).all().get();
+        int retries = 5;
+        while(existingTopics.containsAll(toDelete) && retries > 0) {
+            System.out.println("Trying delete...");
+            retries -= 1;
+            client.deleteTopics(toDelete).all().get();
+            existingTopics = client.listTopics().names().get();
+        }
 
         /* create the source topics with given partition count */
         System.out.print("Creating topics: ");

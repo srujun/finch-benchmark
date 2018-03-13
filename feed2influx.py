@@ -12,9 +12,9 @@ INFLUX_PORT = 8086
 
 def main():
 
-    if len(sys.args) > 1:
-        INFLUX_IP = sys.args[1]
-        INFLUX_PORT = int(sys.args[2])
+    if len(sys.argv) > 1:
+        INFLUX_IP = sys.argv[1]
+        INFLUX_PORT = int(sys.argv[2])
 
     consumer = KafkaConsumer(
         'metrics', value_deserializer=lambda m: json.loads(m.decode('ascii')),
