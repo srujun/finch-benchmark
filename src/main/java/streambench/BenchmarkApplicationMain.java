@@ -9,6 +9,8 @@ import org.apache.samza.runtime.ApplicationRunner;
 import org.apache.samza.runtime.ApplicationRunnerMain;
 import org.apache.samza.runtime.ApplicationRunnerOperation;
 import org.apache.samza.util.Util;
+import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDBFactory;
 import streambench.workload.WorkloadParser;
 
 import java.io.File;
@@ -18,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class BenchmarkApplicationMain extends ApplicationRunnerMain {
 
@@ -75,5 +78,8 @@ public class BenchmarkApplicationMain extends ApplicationRunnerMain {
             default:
                 throw new IllegalArgumentException("Unrecognized operation: " + op);
         }
+
+        // close InfluxDB
+//        BenchmarkApplication.influxDB.close();
     }
 }

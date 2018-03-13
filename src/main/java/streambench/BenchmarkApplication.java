@@ -20,6 +20,20 @@ public class BenchmarkApplication implements StreamApplication {
     /* load generation reference: https://caffinc.github.io/2016/03/cpu-load-generator/ */
     private static final String WORKLOAD_FILE_KEY = "streambench.workload.path";
 
+    // InfluxDB
+    private static final String INFLUXDB_IP_KEY = "streambench.workload.influxdb";
+    private static final String INFLUXDB_DATABASE = "streambench-metrics";
+    private static final String INFLUXDB_RP = "streambench-retention-policy";
+
+    // Metrics
+    private static final String METRICS_STREAM_ID = "metrics";
+    private static final String[] METRICS_HEADERS = {
+        "job-id", "job-name", "host", "container-name", "source",
+    };
+    private static final Set<String> METRICS_HEADERS_SET = new HashSet<>(Arrays.asList(METRICS_HEADERS));
+
+    // static InfluxDB influxDB;
+
     @Override
     public void init(StreamGraph graph, Config config) {
         String workloadFilePath;
@@ -32,6 +46,34 @@ public class BenchmarkApplication implements StreamApplication {
 
         // setup the workload streams
         WorkloadParser.setupStreams(graph, workloadFilePath);
+
+        /* TODO: METRICS USING INFLUXDB JAVA CLIENT
+        influxDB = InfluxDBFactory.connect(config.get(INFLUXDB_IP_KEY), "root", "root");
+        influxDB.enableBatch(50, 5, TimeUnit.SECONDS);
+        if(!influxDB.databaseExists(INFLUXDB_DATABASE)) {
+            influxDB.createDatabase(INFLUXDB_DATABASE);
+        }
+        influxDB.setDatabase(INFLUXDB_DATABASE);
+
+        // setup the metrics collection
+        MessageStream<MetricsSnapshot> metrics = graph.getInputStream(METRICS_STREAM_ID);
+        metrics.sink((msg, collector, coordinator) -> {
+            long timestamp = msg.header().time();
+
+            // extract the header
+            Map<String, Object> tags = new HashMap<>(msg.header().getAsMap());
+            tags.keySet().retainAll(METRICS_HEADERS_SET);
+
+            msg.metrics().getAsMap().forEach((group, metric) -> {
+                Point.Builder pointBuilder = Point.measurement(group);
+                metric.forEach((key, value) -> pointBuilder.addField(key, (double) value));
+                tags.forEach((tagName, tagValue) -> pointBuilder.tag(tagName, tagValue.toString()));
+
+                logger.info(pointBuilder.build().toString());
+                influxDB.write(pointBuilder.build());
+            });
+        });
+        */
     }
 
 }

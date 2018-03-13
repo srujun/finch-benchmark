@@ -1,6 +1,5 @@
 package streambench.system;
 
-import com.google.gson.Gson;
 import org.apache.commons.math3.distribution.AbstractIntegerDistribution;
 import org.apache.commons.math3.distribution.UniformIntegerDistribution;
 import org.apache.commons.math3.distribution.ZipfDistribution;
@@ -12,6 +11,7 @@ import org.apache.samza.system.SystemStreamPartition;
 import org.apache.samza.util.BlockingEnvelopeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import streambench.workload.WorkloadParser;
 import streambench.workload.pojo.WorkloadConfig;
 import streambench.workload.pojo.WorkloadSource;
 
@@ -46,6 +46,7 @@ public class BenchmarkInputMessageConsumer extends BlockingEnvelopeMap implement
     private AbstractIntegerDistribution msgLenDist;
 //    private AbstractIntegerDistribution rateDist;
     private int rate;  // per second
+    private int partitions;
 
     private MessageEmitter messageEmitter;
 
@@ -53,8 +54,7 @@ public class BenchmarkInputMessageConsumer extends BlockingEnvelopeMap implement
 
     public BenchmarkInputMessageConsumer(String systemName, Config config) throws Exception {
         String workloadFilePath = new URI(config.get(WORKLOAD_FILE_KEY)).getPath();
-        Gson gson = new Gson();
-        WorkloadConfig workloadConfig = gson.fromJson(new FileReader(workloadFilePath), WorkloadConfig.class);
+        WorkloadConfig workloadConfig = WorkloadParser.getWorkloadConfig(new FileReader(workloadFilePath));
 
         this.systemName = systemName;
         this.streamName = systemName.substring(0, systemName.lastIndexOf("-system"));
@@ -85,6 +85,8 @@ public class BenchmarkInputMessageConsumer extends BlockingEnvelopeMap implement
 //        keyDist = (UniformIntegerDistribution) rateDistCtor.newInstance(
 //                streamSrc.getRate_dist_params().get("lower"), streamSrc.getRate_dist_params().get("upper"));
         rate = ((Double) streamSrc.getRate_dist_params().get("rate")).intValue();
+
+        partitions = Integer.parseInt(config.get("job.container.count", "1"));
 
         this.messageEmitter = new MessageEmitter(this);
         this.schedulerService = Executors.newSingleThreadScheduledExecutor();
@@ -127,9 +129,9 @@ public class BenchmarkInputMessageConsumer extends BlockingEnvelopeMap implement
 
     @Override
     public void sendMessage(String key, String value) {
-        logger.debug(String.format("sendMessage called with [%s, %s]", key, value));
+        logger.info(String.format("sendMessage called with [%s, %s]", key, value));
 
-        SystemStreamPartition partition = new SystemStreamPartition(systemName, streamName, new Partition(0));
+        SystemStreamPartition partition = new SystemStreamPartition(systemName, streamName, new Partition(key.hashCode() % partitions));
         IncomingMessageEnvelope msgEnvelope = new IncomingMessageEnvelope(partition, null, key, value);
 
         try {

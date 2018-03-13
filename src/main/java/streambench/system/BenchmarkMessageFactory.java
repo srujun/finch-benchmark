@@ -18,6 +18,8 @@ public class BenchmarkMessageFactory implements SystemFactory {
     @Override
     public SystemConsumer getConsumer(String systemName, Config config, MetricsRegistry metricsRegistry) {
         logger.info("Getting BenchmarkMessageFactory consumer");
+//        throw new SamzaException("Cannot consume from BenchmarkMessage system");
+
         SystemConsumer benchmarkSystemConsumer;
 
         try {
@@ -42,6 +44,7 @@ public class BenchmarkMessageFactory implements SystemFactory {
 
     @Override
     public SystemAdmin getAdmin(String s, Config config) {
-        return new SinglePartitionWithoutOffsetsSystemAdmin();
+        int numContainers = Integer.parseInt(config.get("job.container.count", "1"));
+        return new NPartitionsWithoutOffsetsSystemAdmin(numContainers);
     }
 }
