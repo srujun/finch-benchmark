@@ -9,11 +9,12 @@ import org.apache.commons.math3.distribution.AbstractIntegerDistribution;
 import org.apache.commons.math3.distribution.UniformIntegerDistribution;
 import org.apache.commons.math3.distribution.ZipfDistribution;
 import org.apache.commons.text.RandomStringGenerator;
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.samza.config.Config;
 import org.apache.samza.config.MapConfig;
-import org.apache.samza.config.factories.PropertiesConfigFactory;
 import streambench.workload.WorkloadParser;
 import streambench.workload.pojo.WorkloadConfig;
 import streambench.workload.pojo.WorkloadSource;
@@ -21,11 +22,12 @@ import streambench.workload.pojo.WorkloadSource;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.net.URI;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class SimpleProducer {
@@ -35,6 +37,7 @@ public class SimpleProducer {
 
     private static final String NUM_KEYS_PARAM = "num_keys";
     private static final String KAFKA_SERVERS_PARAM = "systems.kafka.producer.bootstrap.servers";
+    private static final String JOB_CONTAINER_COUNT = "job.container.count";
 
     private static RandomStringGenerator generator = new RandomStringGenerator.Builder().withinRange('a', 'z').build();
 
@@ -52,13 +55,26 @@ public class SimpleProducer {
 
         List<String> bootstrapServers =
                 propertiesConfig.getList(KAFKA_SERVERS_PARAM, Collections.singletonList("localhost:9092"));
+        bootstrapServers.forEach(server -> System.out.println("Bootstrap server: " + server));
+
+        int containerCount = propertiesConfig.getInt(JOB_CONTAINER_COUNT, 1);
 
         final Properties kafkaConfig = new Properties();
         kafkaConfig.put("bootstrap.servers", bootstrapServers);
-        kafkaConfig.put("acks", "all");
+        kafkaConfig.put("acks", "1"); // only wait for ack from Kafka leader
         kafkaConfig.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         kafkaConfig.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         final KafkaProducer<String, String> producer = new KafkaProducer<>(kafkaConfig);
+        final AdminClient client = AdminClient.create(kafkaConfig);
+
+        /* create the source topics that this producer will write to */
+        try {
+            SimpleProducer.createSources(client, workloadConfig.getSources(), containerCount);
+        } catch (Exception e) {
+            System.err.println("Failed to create Kafka source topics!");
+            e.printStackTrace();
+            System.exit(-2);
+        }
 
         /* create executor thread pool of size = num of topics to write to */
         ScheduledExecutorService executorService = Executors.newScheduledThreadPool(workloadConfig.getSources().size());
@@ -74,6 +90,39 @@ public class SimpleProducer {
                 }
             }
         );
+    }
+
+    private static void createSources(AdminClient client, Map<String, WorkloadSource> sources, int partitions)
+            throws InterruptedException, ExecutionException {
+        /* delete any existing source topics that may exist */
+        Set<String> existingTopics = client.listTopics().names().get();
+        Set<String> toDelete = new HashSet<>(existingTopics);
+        toDelete.retainAll(sources.keySet());
+
+        System.out.print("Existing topics: ");
+        existingTopics.forEach(topic -> System.out.print(topic + " "));
+        System.out.println();
+        System.out.print("To delete topics: ");
+        toDelete.forEach(topic -> System.out.print(topic + " "));
+        System.out.println();
+
+        client.deleteTopics(toDelete).all().get();
+
+        /* create the source topics with given partition count */
+        System.out.print("Creating topics: ");
+        sources.keySet().forEach(topic -> System.out.print(topic + " "));
+        System.out.println();
+
+        List<NewTopic> newTopics = sources.keySet().stream()
+                .map(topicName -> new NewTopic(topicName, partitions, (short) 1))
+                .collect(Collectors.toList());
+        client.createTopics(newTopics).all().get();
+
+        /* finally, list the topics */
+        Collection<String> finalTopics = client.listTopics().names().get();
+        System.out.print("Final topics: ");
+        finalTopics.forEach(topic -> System.out.print(topic + " "));
+        System.out.println();
     }
 
     private static void createEmitterForSource(KafkaProducer<String, String> producer,
