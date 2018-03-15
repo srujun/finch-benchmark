@@ -130,7 +130,6 @@ public class WorkloadParser {
                                 logger.warn("Have seen, will skip...");
                                 continue;
                             }
-                            seenTransformations.add(name);
 
                             WorkloadTransformation transformation = workloadConfig.getTransformations().get(name);
                             if(transformation == null) {
@@ -145,8 +144,16 @@ public class WorkloadParser {
                                 srcStreams.add(msgStreams.get(streamName));
                             }
 
+                            ArrayList<MessageStream<KV<String, String>>> outStreams;
                             // apply the transformation
-                            ArrayList<MessageStream<KV<String, String>>> outStreams = WorkloadOperation.apply(name, transformation, srcStreams);
+                            try {
+                                outStreams = WorkloadOperation.apply(name, transformation, srcStreams);
+                            } catch (SamzaException e) {
+                                logger.warn("Source streams not set up, will continue");
+                                continue;
+                            }
+
+                            seenTransformations.add(name);
 
                             if (outStreams.size() > 1) {
                                 for (int idx = 0; idx < outStreams.size(); idx++) {

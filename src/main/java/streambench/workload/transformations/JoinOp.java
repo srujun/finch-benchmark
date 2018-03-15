@@ -13,8 +13,6 @@ import streambench.workload.pojo.WorkloadTransformation;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class JoinOp extends WorkloadOperation {
 
@@ -33,8 +31,15 @@ public class JoinOp extends WorkloadOperation {
 
     @Override
     public ArrayList<MessageStream<KV<String, String>>> apply(List<MessageStream<KV<String, String>>> srcStreams) {
+        logger.info("Found " + srcStreams.size() + " src streams");
+
         MessageStream<KV<String, String>> stream1 = srcStreams.get(0);
         MessageStream<KV<String, String>> stream2 = srcStreams.get(1);
+
+        if(stream1 == null || stream2 == null) {
+            logger.warn("Source streams are null");
+            throw new SamzaException("Not enough source streams");
+        }
 
         MessageStream<KV<String, String>> outStream = stream1.join(
             stream2, // join to stream2
