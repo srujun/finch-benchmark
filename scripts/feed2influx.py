@@ -9,6 +9,7 @@ from influxdb import InfluxDBClient
 
 INFLUX_IP = 'localhost'
 INFLUX_PORT = 8086
+DB_NAME = 'streambench-metrics'
 
 def main():
 
@@ -21,13 +22,18 @@ def main():
         bootstrap_servers=['localhost:9092'],
         # auto_offset_reset='earliest', enable_auto_commit=False
     )
-    client = InfluxDBClient(host=INFLUX_IP, port=INFLUX_PORT, database='streambench-metrics')
+    client = InfluxDBClient(host=INFLUX_IP, port=INFLUX_PORT)
+    if DB_NAME not in client.get_list_database():
+        client.create_database(DB_NAME)
 
     try:
         for msg in consumer:
             points = list()
 
-            header = msg.value['header']
+            header_hyphen = msg.value['header']
+            header = {}
+            for key, value in header_hyphen.items():
+                header[key.replace('-', '')] = value
             metrics = msg.value['metrics']
 
             timestamp = dt.datetime.fromtimestamp(header['time']/1000).isoformat() + 'Z'
