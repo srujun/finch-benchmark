@@ -9,6 +9,7 @@ from influxdb import InfluxDBClient
 
 INFLUX_IP = 'localhost'
 INFLUX_PORT = 8086
+KAFA_SERVERS = ['localhost:9092']
 DB_NAME = 'streambench-metrics'
 
 def main():
@@ -19,10 +20,10 @@ def main():
 
     consumer = KafkaConsumer(
         'metrics', value_deserializer=lambda m: json.loads(m.decode('ascii')),
-        bootstrap_servers=['localhost:9092'],
+        bootstrap_servers=KAFA_SERVERS,
         # auto_offset_reset='earliest', enable_auto_commit=False
     )
-    client = InfluxDBClient(host=INFLUX_IP, port=INFLUX_PORT)
+    client = InfluxDBClient(host=INFLUX_IP, port=INFLUX_PORT, database=DB_NAME)
     if DB_NAME not in client.get_list_database():
         client.create_database(DB_NAME)
 
