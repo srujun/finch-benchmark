@@ -7,14 +7,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import streambench.workload.pojo.WorkloadTransformation;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public abstract class WorkloadOperation {
 
     private static final Logger logger = LoggerFactory.getLogger(WorkloadOperation.class);
 
     // TODO: implement CPU load per operation
+    /* load generation reference: https://caffinc.github.io/2016/03/cpu-load-generator/ */
     protected static final long SLEEP_DURATION = 500; // 0.5 second
     protected static final double SLEEP_LOAD = 0.8;
 
@@ -48,4 +52,21 @@ public abstract class WorkloadOperation {
     }
 
     public abstract ArrayList<MessageStream<KV<String, String>>> apply(List<MessageStream<KV<String, String>>> srcStreams);
+
+    Duration parseDuration(String durationString) {
+        final Pattern pattern = Pattern.compile("(?<integer>\\d+)(?<unit>(ms|[ms]))");
+
+        Matcher matcher = pattern.matcher(durationString);
+        if(!matcher.matches())
+            throw new SamzaException("Invalid duration parameter: " + durationString);
+
+        Integer durationInt = Integer.valueOf(matcher.group("integer"));
+        String unit = matcher.group("unit");
+        switch (unit) {
+            case "ms": return Duration.ofMillis(durationInt);
+            case "s": return Duration.ofSeconds(durationInt);
+            case "m": return Duration.ofMinutes(durationInt);
+            default: throw new SamzaException("Invalid duration unit: " + unit);
+        }
+    }
 }

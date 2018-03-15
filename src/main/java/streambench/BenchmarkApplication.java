@@ -17,22 +17,18 @@ public class BenchmarkApplication implements StreamApplication {
 
     private static final Logger logger = LoggerFactory.getLogger(BenchmarkApplication.class);
 
-    /* load generation reference: https://caffinc.github.io/2016/03/cpu-load-generator/ */
     private static final String WORKLOAD_FILE_KEY = "streambench.workload.path";
 
     // InfluxDB
     private static final String INFLUXDB_IP_KEY = "streambench.workload.influxdb";
     private static final String INFLUXDB_DATABASE = "streambench-metrics";
     private static final String INFLUXDB_RP = "streambench-retention-policy";
+    // static InfluxDB influxDB;
 
     // Metrics
     private static final String METRICS_STREAM_ID = "metrics";
-    private static final String[] METRICS_HEADERS = {
-        "job-id", "job-name", "host", "container-name", "source",
-    };
+    private static final String[] METRICS_HEADERS = {"job-id", "job-name", "host", "container-name", "source"};
     private static final Set<String> METRICS_HEADERS_SET = new HashSet<>(Arrays.asList(METRICS_HEADERS));
-
-    // static InfluxDB influxDB;
 
     @Override
     public void init(StreamGraph graph, Config config) {
@@ -47,7 +43,7 @@ public class BenchmarkApplication implements StreamApplication {
         // setup the workload streams
         WorkloadParser.setupStreams(graph, workloadFilePath);
 
-        /* TODO: METRICS USING INFLUXDB JAVA CLIENT
+        /* TODO: METRICS COLLECTION USING INFLUXDB JAVA CLIENT
         influxDB = InfluxDBFactory.connect(config.get(INFLUXDB_IP_KEY), "root", "root");
         influxDB.enableBatch(50, 5, TimeUnit.SECONDS);
         if(!influxDB.databaseExists(INFLUXDB_DATABASE)) {

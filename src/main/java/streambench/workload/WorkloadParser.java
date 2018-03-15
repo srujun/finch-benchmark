@@ -8,7 +8,6 @@ import com.google.gson.Gson;
 import org.apache.samza.SamzaException;
 import org.apache.samza.operators.KV;
 import org.apache.samza.operators.MessageStream;
-import org.apache.samza.operators.OutputStream;
 import org.apache.samza.operators.StreamGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +19,9 @@ import streambench.workload.transformations.WorkloadOperation;
 import java.io.FileReader;
 import java.util.*;
 
+/**
+ * A class of helper functions to use to parse a given workload into different types of formats.
+ */
 public class WorkloadParser {
 
     private static final Logger logger = LoggerFactory.getLogger(WorkloadParser.class);
@@ -29,33 +31,24 @@ public class WorkloadParser {
         return gson.fromJson(workloadFile, WorkloadConfig.class);
     }
 
-    public static Map<String, String> getWorklaodOptions(FileReader workloadFile) {
+    public static Map<String, String> getWorkloadOptions(FileReader workloadFile) {
         Map<String, String> options = new HashMap<>();
 
         WorkloadConfig workloadConfig = WorkloadParser.getWorkloadConfig(workloadFile);
-
         workloadConfig.getSources().forEach(
             (name, src) -> {
-                System.out.println("keydist=" + src.getKey_dist_params());
-                String key;
-                String systemName = name + "-system";
-
-                /* The following lines will initialize the message producing system */
+                /* Initialize the message producing system if being used */
                 /*
-                key = "systems." + systemName + ".samza.factory";
-                options.put(key, BenchmarkMessageFactory.class.getCanonicalName());
-
-                key = "streams." + name + ".samza.system";
-                options.put(key, systemName);
+                String systemName = name + "-system";
+                options.put("systems." + systemName + ".samza.factory", BenchmarkMessageFactory.class.getCanonicalName());
+                options.put("streams." + name + ".samza.system", systemName);
                  */
 
-                key = "streams." + name + ".samza.key.serde";
-                options.put(key, "string");
-                key = "streams." + name + ".samza.msg.serde";
-                options.put(key, "string");
+                /* Specify the serdes being used for the sources */
+                options.put("streams." + name + ".samza.key.serde", "string");
+                options.put("streams." + name + ".samza.msg.serde", "string");
             }
         );
-
         workloadConfig.getTransformations().forEach(
             (name, transformation) -> {
                 System.out.println("Transformation name: " + name);
@@ -75,13 +68,15 @@ public class WorkloadParser {
 
         MutableNetwork<String, String> network = NetworkBuilder.directed().allowsSelfLoops(true).build();
 
+        /* Add the sources and sinks as nodes */
         workloadConfig.getSources().forEach((name, src) -> network.addNode(name));
         workloadConfig.getSinks().forEach(network::addNode);
 
+        /* Build the transformations into edges */
         workloadConfig.getTransformations().forEach(
             (name, transformation) -> {
+                /* Get a list of inputs to this transformation */
                 List<String> streamInputs = new ArrayList<>();
-
                 if(transformation.getInput() != null)
                     streamInputs.add(transformation.getInput());
                 else
@@ -114,6 +109,7 @@ public class WorkloadParser {
             WorkloadConfig workloadConfig = WorkloadParser.getWorkloadConfig(new FileReader(workloadFilePath));
             Network<String, String> workloadNetwork = WorkloadParser.getWorkloadAsNetwork(new FileReader(workloadFilePath));
 
+            /* Traverse the Network (graph) to create the message streams */
             Map<String, MessageStream<KV<String, String>>> msgStreams = new HashMap<>();
             Set<String> seenTransformations = new HashSet<>();
 
@@ -169,13 +165,8 @@ public class WorkloadParser {
                     }
             );
 
-            // Send to outputstreams
-            workloadConfig.getSinks().forEach(
-                    name -> {
-                        OutputStream<KV<String, String>> oStream = graph.getOutputStream(name);
-                        msgStreams.get(name).sendTo(oStream);
-                    }
-            );
+            /* Send to output streams (sinks) */
+            workloadConfig.getSinks().forEach(name -> msgStreams.get(name).sendTo(graph.getOutputStream(name)));
         } catch (Exception e) {
             e.printStackTrace();
             logger.error("Could not create stream graph: " + e.getMessage());

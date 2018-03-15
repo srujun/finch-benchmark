@@ -35,8 +35,7 @@ public class FilterOp extends WorkloadOperation {
     public ArrayList<MessageStream<KV<String, String>>> apply(List<MessageStream<KV<String, String>>> srcStreams) {
         MessageStream<KV<String, String>> srcStream = srcStreams.get(0);
 
-        MessageStream<KV<String, String>> outStream =
-                srcStream.filter(msg -> (rand.nextDouble() <= dropProbability));
+        MessageStream<KV<String, String>> outStream = srcStream.filter(msg -> (rand.nextDouble() <= dropProbability));
         ArrayList<MessageStream<KV<String, String>>> list = new ArrayList<>();
         list.add(outStream);
         return list;
