@@ -107,10 +107,13 @@ public class SimpleProducer {
         System.out.println();
 
         int retries = 5;
-        while(existingTopics.containsAll(toDelete) && retries > 0) {
+        while((existingTopics.containsAll(toDelete) && !toDelete.isEmpty()) && retries > 0) {
             System.out.println("Trying delete...");
             retries -= 1;
             client.deleteTopics(toDelete).all().get();
+
+            /* wait for a couple seconds before retrieving topics again */
+            Thread.sleep(2000);
             existingTopics = client.listTopics().names().get();
         }
 
