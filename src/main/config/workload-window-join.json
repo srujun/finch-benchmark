@@ -44,7 +44,7 @@
     },
     "t2": {
       "operator": "window",
-      "input": "s1",
+      "input": "s2",
       "params": {
         "type": "session",
         "duration": "3s"
