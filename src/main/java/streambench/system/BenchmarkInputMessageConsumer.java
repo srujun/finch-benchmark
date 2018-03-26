@@ -11,6 +11,7 @@ import org.apache.samza.system.SystemStreamPartition;
 import org.apache.samza.util.BlockingEnvelopeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import streambench.workload.SamzaWorkloadParser;
 import streambench.workload.WorkloadParser;
 import streambench.workload.pojo.WorkloadConfig;
 import streambench.workload.pojo.WorkloadSource;
@@ -54,7 +55,7 @@ public class BenchmarkInputMessageConsumer extends BlockingEnvelopeMap implement
 
     public BenchmarkInputMessageConsumer(String systemName, Config config) throws Exception {
         String workloadFilePath = new URI(config.get(WORKLOAD_FILE_KEY)).getPath();
-        WorkloadConfig workloadConfig = WorkloadParser.getWorkloadConfig(new FileReader(workloadFilePath));
+        WorkloadConfig workloadConfig = SamzaWorkloadParser.instance().getWorkloadConfig(new FileReader(workloadFilePath));
 
         this.systemName = systemName;
         this.streamName = systemName.substring(0, systemName.lastIndexOf("-system"));

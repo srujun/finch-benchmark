@@ -15,7 +15,7 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.samza.config.Config;
 import org.apache.samza.config.MapConfig;
-import streambench.workload.WorkloadParser;
+import streambench.workload.SamzaWorkloadParser;
 import streambench.workload.pojo.WorkloadConfig;
 import streambench.workload.pojo.WorkloadSource;
 
@@ -202,7 +202,7 @@ public class SimpleProducer {
         HashMap propertiesMap = new HashMap<>(properties);
         MapConfig propertiesConfig = new MapConfig(propertiesMap);
 
-        return new ImmutablePair<>(WorkloadParser.getWorkloadConfig(workloadReader), propertiesConfig);
+        return new ImmutablePair<>(SamzaWorkloadParser.instance().getWorkloadConfig(workloadReader), propertiesConfig);
     }
 
     private static AbstractIntegerDistribution getDistribution(String type, Map<String, Object> params) throws ClassNotFoundException {

@@ -8,7 +8,7 @@ import org.apache.samza.runtime.ApplicationRunner;
 import org.apache.samza.runtime.ApplicationRunnerMain;
 import org.apache.samza.runtime.ApplicationRunnerOperation;
 import org.apache.samza.util.Util;
-import streambench.workload.WorkloadParser;
+import streambench.workload.SamzaWorkloadParser;
 
 import java.io.File;
 import java.io.FileReader;
@@ -43,7 +43,7 @@ public class BenchmarkApplicationMain extends ApplicationRunnerMain {
         //     throw new SamzaException("Samza " + STREAM_APPLICATION_CLASS_CONFIG + " not defined");
 
         /* Parse the workload file */
-        Map<String, String> workloadOptions = WorkloadParser.getWorkloadOptions(new FileReader(workloadFile));
+        Map<String, String> workloadOptions = SamzaWorkloadParser.instance().getWorkloadOptions(new FileReader(workloadFile));
 
         /* Combine the stored config and the workload options */
         List<Map<String, String>> allConfigs = new ArrayList<>();
@@ -55,7 +55,7 @@ public class BenchmarkApplicationMain extends ApplicationRunnerMain {
         );
 
         System.out.println("Network:");
-        System.out.println(WorkloadParser.getWorkloadAsNetwork(new FileReader(workloadFile)).toString());
+        System.out.println(SamzaWorkloadParser.instance().getWorkloadAsNetwork(new FileReader(workloadFile)).toString());
 
         ApplicationRunner runner = ApplicationRunner.fromConfig(finalConfig);
         // StreamApplication app = (StreamApplication) Class.forName(config.get(STREAM_APPLICATION_CLASS_CONFIG)).newInstance();

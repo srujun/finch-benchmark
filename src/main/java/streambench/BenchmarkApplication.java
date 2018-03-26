@@ -6,7 +6,7 @@ import org.apache.samza.config.Config;
 import org.apache.samza.operators.StreamGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import streambench.workload.WorkloadParser;
+import streambench.workload.SamzaWorkloadParser;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -41,7 +41,7 @@ public class BenchmarkApplication implements StreamApplication {
         }
 
         // setup the workload streams
-        WorkloadParser.setupStreams(graph, workloadFilePath);
+        SamzaWorkloadParser.instance().setupStreams(graph, workloadFilePath);
 
         /* TODO: METRICS COLLECTION USING INFLUXDB JAVA CLIENT
         influxDB = InfluxDBFactory.connect(config.get(INFLUXDB_IP_KEY), "root", "root");
