@@ -18,18 +18,16 @@ public abstract class WorkloadParser {
 
     private static final Logger logger = LoggerFactory.getLogger(WorkloadParser.class);
 
-    public WorkloadConfig getWorkloadConfig(FileReader workloadFile) {
+    public static WorkloadConfig getWorkloadConfig(FileReader workloadFile) {
         Gson gson = new Gson();
         return gson.fromJson(workloadFile, WorkloadConfig.class);
     }
 
-    public abstract Map<String, String> getWorkloadOptions(FileReader workloadFile);
-
-    public ImmutableNetwork<String, String> getWorkloadAsNetwork(FileReader workloadFile) {
+    public static ImmutableNetwork<String, String> getWorkloadAsNetwork(FileReader workloadFile) {
         return getWorkloadAsNetwork(getWorkloadConfig(workloadFile));
     }
 
-    public ImmutableNetwork<String, String> getWorkloadAsNetwork(WorkloadConfig workloadConfig) {
+    public static ImmutableNetwork<String, String> getWorkloadAsNetwork(WorkloadConfig workloadConfig) {
         MutableNetwork<String, String> network = NetworkBuilder.directed().allowsSelfLoops(true).build();
 
         /* Add the sources and sinks as nodes */
@@ -67,4 +65,6 @@ public abstract class WorkloadParser {
 
         return ImmutableNetwork.copyOf(network);
     }
+
+    public abstract Map<String, String> getWorkloadOptions(FileReader workloadFile);
 }

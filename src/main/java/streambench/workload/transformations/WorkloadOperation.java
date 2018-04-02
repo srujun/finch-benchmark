@@ -1,10 +1,8 @@
 package streambench.workload.transformations;
 
-import org.apache.samza.SamzaException;
-import org.apache.samza.operators.KV;
-import org.apache.samza.operators.MessageStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import streambench.StreamBenchException;
 import streambench.workload.pojo.WorkloadTransformation;
 
 import java.time.Duration;
@@ -13,7 +11,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public abstract class WorkloadOperation {
+public abstract class WorkloadOperation<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(WorkloadOperation.class);
 
@@ -25,40 +23,22 @@ public abstract class WorkloadOperation {
     protected String name;
     protected WorkloadTransformation transformation;
 
-    public static ArrayList<MessageStream<KV<String, String>>> apply(
-            String name,
-            WorkloadTransformation transformation,
-            List<MessageStream<KV<String, String>>> srcStreams) {
+    /* TODO: figure out how to make the function below static and enforce subclasses to implement */
+//    public static abstract ArrayList<T> apply(String name, WorkloadTransformation transformation, List<T> srcStreams);
 
-        switch (transformation.getOperator()) {
-            /* STATELESS OPS */
-            case "filter": return new FilterOp(name, transformation).apply(srcStreams);
-            case "split": return new SplitOp(name, transformation).apply(srcStreams);
-            case "modify": return new ModifyOp(name, transformation).apply(srcStreams);
-            case "merge": return new MergeOp(name, transformation).apply(srcStreams);
-
-            /* STATEFUL OPS */
-            case "join": return new JoinOp(name, transformation).apply(srcStreams);
-            case "window": return new WindowOp(name, transformation).apply(srcStreams);
-        }
-
-        logger.error("Unknown operator: " + transformation.getOperator());
-        throw new SamzaException("Unknown operator: " + transformation.getOperator());
-    }
-
-    WorkloadOperation(String name, WorkloadTransformation transformation) {
+    protected WorkloadOperation(String name, WorkloadTransformation transformation) {
         this.name = name;
         this.transformation = transformation;
     }
 
-    public abstract ArrayList<MessageStream<KV<String, String>>> apply(List<MessageStream<KV<String, String>>> srcStreams);
+    public abstract ArrayList<T> apply(List<T> srcStreams);
 
-    Duration parseDuration(String durationString) {
+    protected Duration parseDuration(String durationString) {
         final Pattern pattern = Pattern.compile("(?<integer>\\d+)(?<unit>(ms|[ms]))");
 
         Matcher matcher = pattern.matcher(durationString);
         if(!matcher.matches())
-            throw new SamzaException("Invalid duration parameter: " + durationString);
+            throw new StreamBenchException("Invalid duration parameter: " + durationString);
 
         Integer durationInt = Integer.valueOf(matcher.group("integer"));
         String unit = matcher.group("unit");
@@ -66,7 +46,7 @@ public abstract class WorkloadOperation {
             case "ms": return Duration.ofMillis(durationInt);
             case "s": return Duration.ofSeconds(durationInt);
             case "m": return Duration.ofMinutes(durationInt);
-            default: throw new SamzaException("Invalid duration unit: " + unit);
+            default: throw new StreamBenchException("Invalid duration unit: " + unit);
         }
     }
 }
