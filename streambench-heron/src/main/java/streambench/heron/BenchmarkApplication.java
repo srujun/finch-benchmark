@@ -22,6 +22,7 @@ public class BenchmarkApplication {
     private static final Logger LOG = Logger.getLogger(BenchmarkApplication.class.getName());
 
     private static final String WORKLOAD_OPT = "workload-path";
+    private static final String PROPERTIES_OPT = "properties-path";
 
     public static void main(String[] args) throws IOException {
         FileHandler fileHandler = new FileHandler("benchmark-application.log");
@@ -38,8 +39,14 @@ public class BenchmarkApplication {
         List<String> bootstrapServers = Collections.singletonList("localhost:9092");
 
         Builder builder = Builder.newBuilder();
+        System.out.println("Setting up Heron Streamlets...");
         HeronWorkloadParser.instance().setupStreams(builder, workloadConfig, bootstrapServers);
 
+//        Config config = Config.newBuilder()
+//                .setNumContainers(10)
+//                .setDeliverySemantics(Config.DeliverySemantics.ATLEAST_ONCE)
+//                .setSerializer(Config.Serializer.KRYO)
+//                .build();
         Config config = Config.defaultConfig();
 
         new Runner().run("HeronBenchmark", config, builder);
@@ -51,16 +58,21 @@ public class BenchmarkApplication {
                 .withRequiredArg()
                 .ofType(File.class)
                 .required();
+        OptionSpec<File> propertiesOpt = parser.accepts(PROPERTIES_OPT, "path to Samza .properties file")
+                .withRequiredArg()
+                .ofType(File.class)
+                .required();
         OptionSpec<Void> helpOpt = parser.acceptsAll(Arrays.asList("h", "help"), "Show help")
                 .forHelp();
 
         OptionSet options = parser.parse(fromArgs);
-        if(options.has(helpOpt) || !options.has(workloadOpt)) {
+        if(options.has(helpOpt) || (!options.has(workloadOpt) || !options.has(propertiesOpt))) {
             parser.printHelpOn(System.out);
             System.exit(0);
         }
 
         FileReader workloadReader;
+        FileReader propertiesReader;
 
         try {
             workloadReader = new FileReader(options.valueOf(workloadOpt));
@@ -68,7 +80,13 @@ public class BenchmarkApplication {
             System.err.println("File " + options.valueOf(workloadOpt).getPath() + " not found!");
             throw e;
         }
+        try {
+            propertiesReader = new FileReader(options.valueOf(propertiesOpt));
+        } catch (FileNotFoundException e) {
+            System.err.println("File " + options.valueOf(propertiesOpt).getPath() + " not found!");
+            throw e;
+        }
 
-        return HeronWorkloadParser.instance().getWorkloadConfig(workloadReader);
+        return HeronWorkloadParser.getWorkloadConfig(workloadReader);
     }
 }
