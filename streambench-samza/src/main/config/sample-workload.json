@@ -1,0 +1,39 @@
+{
+  "sources": {
+    "s1": {
+      "key_dist": "org.apache.commons.math3.distribution.ZipfDistribution",
+      "key_dist_params": {
+        "num_keys": 10,
+        "exponent": 1.2
+      },
+      "msg_dist": "org.apache.commons.math3.distribution.UniformIntegerDistribution",
+      "msg_dist_params": {
+        "lower": 100,
+        "upper": 1000
+      },
+      "rate_dist": "org.apache.commons.math3.distribution.UniformIntegerDistribution",
+      "rate_dist_params": {
+        "rate": 1000
+      }
+    }
+  },
+  "transformations": {
+    "t1": {
+      "operator": "filter",
+      "input": "s1",
+      "params": {
+        "p": 0.5
+      }
+    },
+    "t2": {
+      "operator": "modify",
+      "input": "t1",
+      "params": {
+        "size_ratio": 0.5
+      }
+    }
+  },
+  "sinks": [
+    "t2"
+  ]
+}
