@@ -7,11 +7,12 @@ import com.twitter.heron.streamlet.WindowConfig;
 import streambench.workload.pojo.WorkloadTransformation;
 import streambench.workload.transformations.WindowOp;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class HeronWindowOp extends WindowOp<Streamlet<KeyValue<String, String>>> {
+public class HeronWindowOp extends WindowOp<Streamlet<KeyValue<String, String>>> implements Serializable {
 
     HeronWindowOp(String name, WorkloadTransformation transformation) {
         super(name, transformation);

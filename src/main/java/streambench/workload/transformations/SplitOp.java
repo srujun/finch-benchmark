@@ -5,9 +5,11 @@ import org.slf4j.LoggerFactory;
 import streambench.StreamBenchException;
 import streambench.workload.pojo.WorkloadTransformation;
 
-public abstract class SplitOp<T> extends WorkloadOperation<T> {
+import java.io.Serializable;
 
-    protected static final Logger logger = LoggerFactory.getLogger(SplitOp.class);
+public abstract class SplitOp<T> extends WorkloadOperation<T> implements Serializable {
+
+    private static final Logger logger = LoggerFactory.getLogger(SplitOp.class);
     protected static final String PARAM_N = "n";
 
     protected int numOutputStreams;

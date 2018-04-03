@@ -5,11 +5,12 @@ import org.slf4j.LoggerFactory;
 import streambench.StreamBenchException;
 import streambench.workload.pojo.WorkloadTransformation;
 
+import java.io.Serializable;
 import java.time.Duration;
 
-public abstract class WindowOp<T> extends WorkloadOperation<T> {
+public abstract class WindowOp<T> extends WorkloadOperation<T> implements Serializable {
 
-    protected static final Logger logger = LoggerFactory.getLogger(WindowOp.class);
+    private static final Logger logger = LoggerFactory.getLogger(WindowOp.class);
     protected static final String PARAM_WINDOW_TYPE = "type";
     protected static final String PARAM_WINDOW_TRIGGER = "trigger";
     protected static final String PARAM_WINDOW_DURATION = "duration";

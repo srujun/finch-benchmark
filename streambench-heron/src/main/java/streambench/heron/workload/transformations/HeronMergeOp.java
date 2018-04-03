@@ -5,12 +5,13 @@ import com.twitter.heron.streamlet.Streamlet;
 import streambench.workload.pojo.WorkloadTransformation;
 import streambench.workload.transformations.MergeOp;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-public class HeronMergeOp extends MergeOp<Streamlet<KeyValue<String, String>>> {
+public class HeronMergeOp extends MergeOp<Streamlet<KeyValue<String, String>>> implements Serializable {
 
     HeronMergeOp(String name, WorkloadTransformation transformation) {
         super(name, transformation);

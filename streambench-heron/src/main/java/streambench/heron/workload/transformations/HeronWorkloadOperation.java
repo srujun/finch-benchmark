@@ -8,10 +8,11 @@ import streambench.StreamBenchException;
 import streambench.workload.pojo.WorkloadTransformation;
 import streambench.workload.transformations.WorkloadOperation;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class HeronWorkloadOperation extends WorkloadOperation<Streamlet<KeyValue<String, String>>> {
+public abstract class HeronWorkloadOperation extends WorkloadOperation<Streamlet<KeyValue<String, String>>> implements Serializable {
 
     protected static final Logger logger = LoggerFactory.getLogger(HeronWorkloadOperation.class);
 

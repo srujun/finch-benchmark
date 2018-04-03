@@ -4,15 +4,20 @@ import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.KeyedWindow;
 import com.twitter.heron.streamlet.Streamlet;
 import com.twitter.heron.streamlet.WindowConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import streambench.StreamBenchException;
 import streambench.workload.pojo.WorkloadTransformation;
 import streambench.workload.transformations.JoinOp;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class HeronJoinOp extends JoinOp<Streamlet<KeyValue<String, String>>> {
+public class HeronJoinOp extends JoinOp<Streamlet<KeyValue<String, String>>> implements Serializable {
+
+    private static final Logger logger = LoggerFactory.getLogger(HeronJoinOp.class);
 
     HeronJoinOp(String name, WorkloadTransformation transformation) {
         super(name, transformation);

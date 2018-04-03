@@ -5,13 +5,14 @@ import org.slf4j.LoggerFactory;
 import streambench.StreamBenchException;
 import streambench.workload.pojo.WorkloadTransformation;
 
+import java.io.Serializable;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public abstract class WorkloadOperation<T> {
+public abstract class WorkloadOperation<T> implements Serializable {
 
     private static final Logger logger = LoggerFactory.getLogger(WorkloadOperation.class);
 

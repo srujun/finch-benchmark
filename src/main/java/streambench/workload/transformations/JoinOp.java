@@ -4,11 +4,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import streambench.workload.pojo.WorkloadTransformation;
 
+import java.io.Serializable;
 import java.time.Duration;
 
-public abstract class JoinOp<T> extends WorkloadOperation<T> {
+public abstract class JoinOp<T> extends WorkloadOperation<T> implements Serializable {
 
-    protected static final Logger logger = LoggerFactory.getLogger(JoinOp.class);
+    private static final Logger logger = LoggerFactory.getLogger(JoinOp.class);
 
     protected static final String PARAM_TTL = "ttl";
 

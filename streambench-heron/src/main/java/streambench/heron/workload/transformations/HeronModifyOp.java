@@ -5,11 +5,12 @@ import com.twitter.heron.streamlet.Streamlet;
 import streambench.workload.pojo.WorkloadTransformation;
 import streambench.workload.transformations.ModifyOp;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class HeronModifyOp extends ModifyOp<Streamlet<KeyValue<String, String>>> {
+public class HeronModifyOp extends ModifyOp<Streamlet<KeyValue<String, String>>> implements Serializable {
 
     HeronModifyOp(String name, WorkloadTransformation transformation) {
         super(name, transformation);
@@ -32,21 +33,21 @@ public class HeronModifyOp extends ModifyOp<Streamlet<KeyValue<String, String>>>
                         outMsgs.add(msg);
 
                     return outMsgs;
+                })
+                /* size modify */
+                .map(kv -> {
+                    String key = kv.getKey();
+                    String val = kv.getValue();
+                    StringBuilder finalValBuilder = new StringBuilder();
+                    int size_whole = (new Double(Math.floor(size_ratio))).intValue();
+                    double size_frac = size_ratio - Math.floor(size_ratio);
+
+                    for(int i = 0; i < size_whole; i++) {
+                        finalValBuilder.append(val);
+                    }
+                    finalValBuilder.append(val.substring(0, (new Double(val.length() * size_frac)).intValue()));
+                    return new KeyValue<>(key, finalValBuilder.toString());
                 });
-//                /* size modify */
-//                .map(kv -> {
-//                    String key = kv.getKey();
-//                    String val = kv.getValue();
-//                    StringBuilder finalValBuilder = new StringBuilder();
-//                    int size_whole = (new Double(Math.floor(size_ratio))).intValue();
-//                    double size_frac = size_ratio - Math.floor(size_ratio);
-//
-//                    for(int i = 0; i < size_whole; i++) {
-//                        finalValBuilder.append(val);
-//                    }
-//                    finalValBuilder.append(val.substring(0, (new Double(val.length() * size_frac)).intValue()));
-//                    return new KeyValue<>(key, finalValBuilder.toString());
-//                });
 
         return new ArrayList<>(Collections.singletonList(outStream));
     }

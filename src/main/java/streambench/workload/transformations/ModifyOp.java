@@ -4,11 +4,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import streambench.workload.pojo.WorkloadTransformation;
 
+import java.io.Serializable;
 import java.util.Random;
 
-public abstract class ModifyOp<T> extends WorkloadOperation<T> {
+public abstract class ModifyOp<T> extends WorkloadOperation<T> implements Serializable {
 
-    protected static final Logger logger = LoggerFactory.getLogger(FilterOp.class);
+    private static final Logger logger = LoggerFactory.getLogger(FilterOp.class);
     protected static final String PARAM_RATE_RATIO = "rate_ratio";
     protected static final String PARAM_SIZE_RATIO = "size_ratio";
 

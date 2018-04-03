@@ -1,9 +1,10 @@
 package streambench.workload.pojo;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-public class WorkloadTransformation extends WorkloadNode {
+public class WorkloadTransformation extends WorkloadNode implements Serializable {
 
     private String operator;
     private String input;
