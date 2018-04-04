@@ -7,9 +7,9 @@ import sys
 from kafka import KafkaConsumer
 from influxdb import InfluxDBClient
 
-INFLUX_IP = 'ip-172-31-19-93'
+INFLUX_IP = 'ip-172-31-63-199'
 INFLUX_PORT = 8086
-KAFA_SERVERS = ['ip-172-31-19-106:9092', 'ip-172-31-19-77:9092']
+KAFA_SERVERS = ['ip-172-31-23-57:9092', 'ip-172-31-27-22:9092']
 DB_NAME = 'streambench-metrics'
 
 
