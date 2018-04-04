@@ -23,7 +23,7 @@
       "input": "s1",
       "params": {
         "type": "tumbling",
-        "duration": "5s"
+        "duration": "1s"
       }
     }
   },
