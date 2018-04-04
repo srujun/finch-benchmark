@@ -1,11 +1,12 @@
 package streambench.samza.workload.transformations;
 
-import org.apache.samza.SamzaException;
 import org.apache.samza.operators.KV;
 import org.apache.samza.operators.MessageStream;
 import org.apache.samza.operators.functions.JoinFunction;
 import org.apache.samza.serializers.KVSerde;
 import org.apache.samza.serializers.StringSerde;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import streambench.StreamBenchException;
 import streambench.workload.pojo.WorkloadTransformation;
 import streambench.workload.transformations.JoinOp;
@@ -15,6 +16,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class SamzaJoinOp extends JoinOp<MessageStream<KV<String, String>>> {
+
+    private static final Logger logger = LoggerFactory.getLogger(SamzaJoinOp.class);
 
     SamzaJoinOp(String name, WorkloadTransformation transformation) {
         super(name, transformation);
