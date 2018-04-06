@@ -159,7 +159,7 @@ public class SimpleProducer {
         /* TODO: change to variable rate instead of fixed rate */
         int rate = ((Double) src.getRate_dist_params().get("rate")).intValue();
 
-        executorService.scheduleAtFixedRate(msgEmitter, 0, 1000 / rate, TimeUnit.MILLISECONDS);
+        executorService.scheduleAtFixedRate(msgEmitter, 0, 1000000 / rate, TimeUnit.MICROSECONDS);
     }
 
     private static Pair<WorkloadConfig, Config> getWorkloadConfigFromArgs(String[] fromArgs) throws Exception {
