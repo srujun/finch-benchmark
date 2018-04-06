@@ -143,13 +143,26 @@ public class SimpleProducer {
         AbstractIntegerDistribution msgDist = SimpleProducer.getDistribution(src.getMsg_dist(), src.getMsg_dist_params());
 
         /* create a list of keys */
-        int numKeys = ((Double) src.getKey_dist_params().get(NUM_KEYS_PARAM)).intValue();
+        int numKeys;
+        if(src.getKey_dist_params().containsKey(NUM_KEYS_PARAM)) {
+            numKeys = ((Double) src.getKey_dist_params().get(NUM_KEYS_PARAM)).intValue();
+        } else {
+            int lower = ((Double) src.getKey_dist_params().get("lower")).intValue();
+            int upper = ((Double) src.getKey_dist_params().get("upper")).intValue();
+            numKeys = upper - lower + 1; // upper and lower are inclusive
+        }
+
         String[] keys = IntStream.range(0, numKeys)
                                  .mapToObj(i -> "key" + i)
                                  .toArray(String[]::new);
+        System.out.println("keys: " + Arrays.toString(keys));
 
         final Runnable msgEmitter = () -> {
             int keyIndex = keyDist.sample() - 1;  // adjust for returned range of [1, k]
+            if(keyIndex < 0) {
+                System.err.println("GENERATED NEGATIVE KEY INDEX!");
+                keyIndex = 0;
+            }
             String msg = generator.generate(msgDist.sample());
 
             final ProducerRecord<String, String> record = new ProducerRecord<>(srcName, keys[keyIndex], msg);
@@ -158,6 +171,7 @@ public class SimpleProducer {
 
         /* TODO: change to variable rate instead of fixed rate */
         int rate = ((Double) src.getRate_dist_params().get("rate")).intValue();
+        System.out.println("rate: " + rate);
 
         executorService.scheduleAtFixedRate(msgEmitter, 0, 1000000 / rate, TimeUnit.MICROSECONDS);
     }
@@ -207,7 +221,7 @@ public class SimpleProducer {
 
     private static AbstractIntegerDistribution getDistribution(String type, Map<String, Object> params) throws ClassNotFoundException {
         if(type.contains("Zipf")) {
-            return new ZipfDistribution(((Double) params.get("num_keys")).intValue(), (Double) params.get("exponent"));
+            return new ZipfDistribution(((Double) params.get(NUM_KEYS_PARAM)).intValue(), (Double) params.get("exponent"));
         } else if(type.contains("Uniform")) {
             return new UniformIntegerDistribution(((Double) params.get("lower")).intValue(), ((Double) params.get("upper")).intValue());
         } else {
