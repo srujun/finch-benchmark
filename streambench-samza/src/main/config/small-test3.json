@@ -1,10 +1,10 @@
 {
   "sources": {
-    "s1": {
+    "source1": {
       "key_dist": "org.apache.commons.math3.distribution.UniformIntegerDistribution",
       "key_dist_params": {
         "lower": 1,
-        "upper": 10
+        "upper": 5
       },
       "msg_dist": "org.apache.commons.math3.distribution.UniformIntegerDistribution",
       "msg_dist_params": {
@@ -18,22 +18,44 @@
     }
   },
   "transformations": {
-    "t1": {
+    "filter1": {
       "operator": "filter",
-      "input": "s1",
+      "input": "source1",
       "params": {
         "p": 0.5
       }
     },
-    "t2": {
-      "operator": "modify",
-      "input": "w1",
+    "split1": {
+      "operator": "split",
+      "input": "filter1",
       "params": {
-        "rate_ratio": 2
+        "n": 2
+      },
+      "outputs": ["split1__1", "split1__2"]
+    },
+    "filter2": {
+      "operator": "filter",
+      "input": "split1__1",
+      "params": {
+        "p": 0.75
+      }
+    },
+    "modify1": {
+      "operator": "modify",
+      "input": "split1__2",
+      "params": {
+        "size_ratio": 1.5
+      }
+    },
+    "join1": {
+      "operator": "join",
+      "inputs": ["filter2", "modify1"],
+      "params": {
+        "ttl": "5s"
       }
     }
   },
   "sinks": [
-    "t2"
+    "join1"
   ]
 }

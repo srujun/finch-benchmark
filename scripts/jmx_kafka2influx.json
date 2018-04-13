@@ -1,0 +1,220 @@
+{
+  "servers": [
+    {
+      "port": "55551",
+      "host": "localhost",
+      "queries": [
+        {
+          "resultAlias": "java.lang.Memory",
+          "obj": "java.lang:type=Memory",
+          "attr": [ "HeapMemoryUsage", "NonHeapMemoryUsage" ],
+          "outputWriters": [
+            {
+              "@class": "com.googlecode.jmxtrans.model.output.InfluxDbWriterFactory",
+              "url":"${influxurl}",
+              "database": "${dbname}",
+              "username": "admin",
+              "password": "admin",
+              "tags": { "application": "kafka" }
+            }
+          ]
+        },
+        {
+          "resultAlias": "kafka.server.BrokerTopicMetrics.BytesInPerSec",
+          "obj": "kafka.server:type=BrokerTopicMetrics,name=BytesInPerSec",
+          "attr": [
+            "Count",
+            "FiveMinuteRate",
+            "EventType",
+            "RateUnit",
+            "MeanRate",
+            "OneMinuteRate",
+            "FifteenMinuteRate"
+          ],
+          "outputWriters": [
+            {
+              "@class": "com.googlecode.jmxtrans.model.output.InfluxDbWriterFactory",
+              "url":"${influxurl}",
+              "database": "${dbname}",
+              "username": "admin",
+              "password": "admin",
+              "tags": { "application": "kafka" }
+            }
+          ]
+        },
+        {
+          "resultAlias": "kafka.server.BrokerTopicMetrics.BytesOutPerSec",
+          "obj": "kafka.server:type=BrokerTopicMetrics,name=BytesOutPerSec",
+          "attr": [
+            "Count",
+            "FiveMinuteRate",
+            "EventType",
+            "RateUnit",
+            "MeanRate",
+            "OneMinuteRate",
+            "FifteenMinuteRate"
+          ],
+          "outputWriters": [
+            {
+              "@class": "com.googlecode.jmxtrans.model.output.InfluxDbWriterFactory",
+              "url":"${influxurl}",
+              "database": "${dbname}",
+              "username": "admin",
+              "password": "admin",
+              "tags": { "application": "kafka" }
+            }
+          ]
+        },
+        {
+          "resultAlias": "kafka.server.BrokerTopicMetrics.FailedFetchRequestsPerSec",
+          "obj": "kafka.server:type=BrokerTopicMetrics,name=FailedFetchRequestsPerSec",
+          "attr": [
+            "Count",
+            "FiveMinuteRate",
+            "EventType",
+            "RateUnit",
+            "MeanRate",
+            "OneMinuteRate",
+            "FifteenMinuteRate"
+          ],
+          "outputWriters": [
+            {
+              "@class": "com.googlecode.jmxtrans.model.output.InfluxDbWriterFactory",
+              "url":"${influxurl}",
+              "database": "${dbname}",
+              "username": "admin",
+              "password": "admin",
+              "tags": { "application": "kafka" }
+            }
+          ]
+        },
+        {
+          "resultAlias": "kafka.server.BrokerTopicMetrics.FailedProduceRequestsPerSec",
+          "obj": "kafka.server:type=BrokerTopicMetrics,name=FailedProduceRequestsPerSec",
+          "attr": [
+            "Count",
+            "FiveMinuteRate",
+            "EventType",
+            "RateUnit",
+            "MeanRate",
+            "OneMinuteRate",
+            "FifteenMinuteRate"
+          ],
+          "outputWriters": [
+            {
+              "@class": "com.googlecode.jmxtrans.model.output.InfluxDbWriterFactory",
+              "url":"${influxurl}",
+              "database": "${dbname}",
+              "username": "admin",
+              "password": "admin",
+              "tags": { "application": "kafka" }
+            }
+          ]
+        },
+        {
+          "resultAlias" : "kafka.server.BrokerTopicMetrics.TotalFetchRequestsPerSec",
+          "obj" : "kafka.server:type=BrokerTopicMetrics,name=TotalFetchRequestsPerSec",
+          "attr" : [
+            "Count",
+            "FiveMinuteRate",
+            "EventType",
+            "RateUnit",
+            "MeanRate",
+            "OneMinuteRate",
+            "FifteenMinuteRate"
+          ],
+          "outputWriters": [
+            {
+              "@class": "com.googlecode.jmxtrans.model.output.InfluxDbWriterFactory",
+              "url":"${influxurl}",
+              "database": "${dbname}",
+              "username": "admin",
+              "password": "admin",
+              "tags": { "application": "kafka" }
+            }
+          ]
+        },
+        {
+          "resultAlias" : "kafka.server.BrokerTopicMetrics.TotalProduceRequestsPerSec",
+          "obj" : "kafka.server:type=BrokerTopicMetrics,name=TotalProduceRequestsPerSec",
+          "attr" : [
+            "Count",
+            "FiveMinuteRate",
+            "EventType",
+            "RateUnit",
+            "MeanRate",
+            "OneMinuteRate",
+            "FifteenMinuteRate"
+          ],
+          "outputWriters": [
+            {
+              "@class": "com.googlecode.jmxtrans.model.output.InfluxDbWriterFactory",
+              "url":"${influxurl}",
+              "database": "${dbname}",
+              "username": "admin",
+              "password": "admin",
+              "tags": { "application": "kafka" }
+            }
+          ]
+        },
+        {
+          "resultAlias": "kafka.server.BrokerTopicMetrics.MessagesInPerSec",
+          "obj": "kafka.server:type=BrokerTopicMetrics,name=MessagesInPerSec",
+          "attr": [
+            "Count",
+            "FiveMinuteRate",
+            "EventType",
+            "RateUnit",
+            "MeanRate",
+            "OneMinuteRate",
+            "FifteenMinuteRate"
+          ],
+          "outputWriters": [
+            {
+              "@class": "com.googlecode.jmxtrans.model.output.InfluxDbWriterFactory",
+              "url":"${influxurl}",
+              "database": "${dbname}",
+              "username": "admin",
+              "password": "admin",
+              "tags": { "application": "kafka" }
+            }
+          ]
+        },
+        {
+          "resultAlias" : "kafka.server.ReplicaManager.LeaderCount",
+          "obj" : "kafka.server:type=ReplicaManager,name=LeaderCount",
+          "attr" : [
+            "Value"
+          ],
+          "outputWriters": [
+            {
+              "@class": "com.googlecode.jmxtrans.model.output.InfluxDbWriterFactory",
+              "url":"${influxurl}",
+              "database": "${dbname}",
+              "username": "admin",
+              "password": "admin",
+              "tags": { "application": "kafka" }
+            }
+          ]
+        },
+        {
+          "resultAlias" : "kafka.server.ReplicaManager.PartitionCount",
+          "obj" : "kafka.server:type=ReplicaManager,name=PartitionCount",
+          "attr" : [
+            "Value"
+          ],
+          "outputWriters": [
+            {
+              "@class": "com.googlecode.jmxtrans.model.output.InfluxDbWriterFactory",
+              "url":"${influxurl}",
+              "database": "${dbname}",
+              "username": "admin",
+              "password": "admin",
+              "tags": { "application": "kafka" }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

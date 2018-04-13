@@ -1,10 +1,10 @@
 {
   "sources": {
-    "s1": {
+    "source1": {
       "key_dist": "org.apache.commons.math3.distribution.UniformIntegerDistribution",
       "key_dist_params": {
         "lower": 1,
-        "upper": 10
+        "upper": 5
       },
       "msg_dist": "org.apache.commons.math3.distribution.UniformIntegerDistribution",
       "msg_dist_params": {
@@ -18,22 +18,22 @@
     }
   },
   "transformations": {
-    "t1": {
+    "filter1": {
       "operator": "filter",
-      "input": "s1",
+      "input": "source1",
       "params": {
         "p": 0.5
       }
     },
-    "t2": {
+    "modify1": {
       "operator": "modify",
-      "input": "w1",
+      "input": "filter1",
       "params": {
         "rate_ratio": 2
       }
     }
   },
   "sinks": [
-    "t2"
+    "modify1"
   ]
 }
