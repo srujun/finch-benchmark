@@ -252,25 +252,25 @@
             "batch-size-avg",
             "batch-size-max",
             "batch-split-rate",
-            "batch-split-total",
             "compression-rate-avg",
             "metadata-age",
+            "network-io-rate",
             "produce-throttle-time-avg",
             "produce-throttle-time-max",
             "record-error-rate",
-            "record-error-total",
             "record-queue-time-avg",
             "record-queue-time-max",
             "record-retry-rate",
-            "record-retry-total",
             "record-send-rate",
-            "record-send-total",
             "record-size-avg",
             "record-size-max",
             "records-per-request-avg",
             "request-latency-avg",
             "request-latency-max",
-            "requests-in-flight"
+            "request-rate",
+            "requests-in-flight",
+            "response-rate",
+            "select-rate"
           ],
           "outputWriters": [
             {
@@ -289,14 +289,10 @@
           "obj": "kafka.producer:type=producer-topic-metrics,*",
           "attr": [
             "byte-rate",
-            "byte-total",
             "compression-rate",
             "record-error-rate",
-            "record-error-total",
             "record-retry-rate",
-            "record-retry-total",
-            "record-send-rate",
-            "record-send-total"
+            "record-send-rate"
           ],
           "outputWriters": [
             {
