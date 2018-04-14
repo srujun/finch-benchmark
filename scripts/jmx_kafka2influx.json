@@ -215,6 +215,99 @@
           ]
         }
       ]
+    },
+    {
+      "port": "55552",
+      "host": "localhost",
+      "queries": [
+        {
+          "resultAlias": "kafka.producer.producer-node-metrics",
+          "obj": "kafka.producer:type=producer-node-metrics,client-id=*,node-id=*",
+          "attr": [
+            "outgoing-byte-rate",
+            "request-rate",
+            "request-size-avg",
+            "request-size-max",
+            "incoming-byte-rate",
+            "request-latency-avg",
+            "request-latency-max",
+            "response-rate"
+          ],
+          "outputWriters": [
+            {
+              "@class": "com.googlecode.jmxtrans.model.output.InfluxDbWriterFactory",
+              "url":"${influxurl}",
+              "database": "${dbname}",
+              "username": "admin",
+              "password": "admin",
+              "tags": { "application": "kafka" }
+            }
+          ]
+        },
+        {
+          "resultAlias": "kafka.producer.producer-metrics",
+          "obj": "kafka.producer:type=producer-metrics,client-id=*",
+          "attr": [
+            "batch-size-avg",
+            "batch-size-max",
+            "batch-split-rate",
+            "batch-split-total",
+            "compression-rate-avg",
+            "metadata-age",
+            "produce-throttle-time-avg",
+            "produce-throttle-time-max",
+            "record-error-rate",
+            "record-error-total",
+            "record-queue-time-avg",
+            "record-queue-time-max",
+            "record-retry-rate",
+            "record-retry-total",
+            "record-send-rate",
+            "record-send-total",
+            "record-size-avg",
+            "record-size-max",
+            "records-per-request-avg",
+            "request-latency-avg",
+            "request-latency-max",
+            "requests-in-flight"
+          ],
+          "outputWriters": [
+            {
+              "@class": "com.googlecode.jmxtrans.model.output.InfluxDbWriterFactory",
+              "url":"${influxurl}",
+              "database": "${dbname}",
+              "username": "admin",
+              "password": "admin",
+              "tags": { "application": "kafka" }
+            }
+          ]
+        },
+        {
+          "resultAlias": "kafka.producer.producer-topic-metrics",
+          "obj": "kafka.producer:type=producer-topic-metrics,client-id=*,topic=*",
+          "attr": [
+            "byte-rate",
+            "byte-total",
+            "compression-rate",
+            "record-error-rate",
+            "record-error-total",
+            "record-retry-rate",
+            "record-retry-total",
+            "record-send-rate",
+            "record-send-total"
+          ],
+          "outputWriters": [
+            {
+              "@class": "com.googlecode.jmxtrans.model.output.InfluxDbWriterFactory",
+              "url":"${influxurl}",
+              "database": "${dbname}",
+              "username": "admin",
+              "password": "admin",
+              "tags": { "application": "kafka" }
+            }
+          ]
+        }
+      ]
     }
   ]
 }
