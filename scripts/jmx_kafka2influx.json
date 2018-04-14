@@ -222,7 +222,7 @@
       "queries": [
         {
           "resultAlias": "kafka.producer.producer-node-metrics",
-          "obj": "kafka.producer:type=producer-node-metrics,client-id=*,node-id=*",
+          "obj": "kafka.producer:type=producer-node-metrics,*",
           "attr": [
             "outgoing-byte-rate",
             "request-rate",
@@ -240,13 +240,14 @@
               "database": "${dbname}",
               "username": "admin",
               "password": "admin",
-              "tags": { "application": "kafka" }
+              "tags": { "application": "kafka" },
+              "typeNames": [ "client-id", "node-id" ]
             }
           ]
         },
         {
           "resultAlias": "kafka.producer.producer-metrics",
-          "obj": "kafka.producer:type=producer-metrics,client-id=*",
+          "obj": "kafka.producer:type=producer-metrics,*",
           "attr": [
             "batch-size-avg",
             "batch-size-max",
@@ -278,13 +279,14 @@
               "database": "${dbname}",
               "username": "admin",
               "password": "admin",
-              "tags": { "application": "kafka" }
+              "tags": { "application": "kafka" },
+              "typeNames": [ "client-id" ]
             }
           ]
         },
         {
           "resultAlias": "kafka.producer.producer-topic-metrics",
-          "obj": "kafka.producer:type=producer-topic-metrics,client-id=*,topic=*",
+          "obj": "kafka.producer:type=producer-topic-metrics,*",
           "attr": [
             "byte-rate",
             "byte-total",
@@ -303,7 +305,8 @@
               "database": "${dbname}",
               "username": "admin",
               "password": "admin",
-              "tags": { "application": "kafka" }
+              "tags": { "application": "kafka" },
+              "typeNames": [ "client-id", "topic" ]
             }
           ]
         }
