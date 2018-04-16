@@ -38,12 +38,12 @@ public class BenchmarkApplication {
             System.exit(-1);
         }
 
-        List<String> bootstrapServers = Arrays.asList("ip-172-31-23-57:9092", "ip-172-31-27-22:9092");
+        List<String> bootstrapServers = Arrays.asList("ip-172-31-5-82:9092", "ip-172-31-6-235:9092");
 //        List<String> bootstrapServers = Collections.singletonList("localhost:9092");
 
         Builder builder = Builder.newBuilder();
         System.out.println("Setting up Heron Streamlets...");
-//        HeronWorkloadParser.instance().setupStreams(builder, workloadConfig, bootstrapServers);
+        HeronWorkloadParser.instance().setupStreams(builder, workloadConfig, bootstrapServers);
 
 //        Config config = Config.newBuilder()
 //                .setNumContainers(10)
@@ -51,10 +51,10 @@ public class BenchmarkApplication {
 //                .setSerializer(Config.Serializer.KRYO)
 //                .build();
 
-        Streamlet<KeyValue<String, String>> source =
-                builder.newSource(new KafkaSource(bootstrapServers, "source1"))
-                       .setName("source1");
-        source.toSink(new KafkaSink(bootstrapServers, "sink1"));
+//        Streamlet<KeyValue<String, String>> source =
+//                builder.newSource(new KafkaSource(bootstrapServers, "source1"))
+//                       .setName("source1");
+//        source.toSink(new KafkaSink(bootstrapServers, "sink1"));
 
         Config config = Config.defaultConfig();
 
