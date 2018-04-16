@@ -50,6 +50,7 @@ public class SimpleProducer {
             workloadConfig = pair.getLeft();
             propertiesConfig = pair.getRight();
         } catch (Exception e) {
+            System.err.println("Unable to parse input files.");
             System.exit(-1);
         }
 
