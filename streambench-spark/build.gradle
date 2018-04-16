@@ -2,7 +2,6 @@ group 'com.srujun'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
-apply plugin: 'idea'
 
 sourceCompatibility = 1.8
 
@@ -13,4 +12,12 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
+
+    compile group: 'org.apache.spark', name: 'spark-core_2.11', version: '2.3.0'
+    compile group: 'org.apache.spark', name: 'spark-streaming_2.11', version: '2.3.0'
+    compile group: 'org.apache.spark', name: 'spark-streaming-kafka-0-10_2.11', version: '2.3.0'
+
+    compile group: 'org.apache.kafka', name: 'kafka-clients', version: '1.1.0'
+
+    compile group: 'com.github.benfradet', name: 'spark-kafka-0-10-writer_2.11', version: '0.3.0'
 }
