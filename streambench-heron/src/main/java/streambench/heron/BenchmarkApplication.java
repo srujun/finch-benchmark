@@ -43,13 +43,18 @@ public class BenchmarkApplication {
 
         Builder builder = Builder.newBuilder();
         System.out.println("Setting up Heron Streamlets...");
-        HeronWorkloadParser.instance().setupStreams(builder, workloadConfig, bootstrapServers);
+//        HeronWorkloadParser.instance().setupStreams(builder, workloadConfig, bootstrapServers);
 
 //        Config config = Config.newBuilder()
 //                .setNumContainers(10)
 //                .setDeliverySemantics(Config.DeliverySemantics.ATLEAST_ONCE)
 //                .setSerializer(Config.Serializer.KRYO)
 //                .build();
+
+        Streamlet<KeyValue<String, String>> source =
+                builder.newSource(new KafkaSource(bootstrapServers, "source1"))
+                       .setName("source1");
+        source.toSink(new KafkaSink(bootstrapServers, "sink1"));
 
         Config config = Config.defaultConfig();
 
