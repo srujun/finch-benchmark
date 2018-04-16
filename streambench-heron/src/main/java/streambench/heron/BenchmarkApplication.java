@@ -39,6 +39,7 @@ public class BenchmarkApplication {
         }
 
         List<String> bootstrapServers = Arrays.asList("ip-172-31-23-57:9092", "ip-172-31-27-22:9092");
+//        List<String> bootstrapServers = Collections.singletonList("localhost:9092");
 
         Builder builder = Builder.newBuilder();
         System.out.println("Setting up Heron Streamlets...");
