@@ -44,16 +44,14 @@ public class InfluxDBSink implements IMetricsSink {
         topologyName = context.getTopologyName();
 
         serverHost = (String) conf.get(SERVER_HOST_KEY);
-        serverPort = (String) conf.get(SERVER_PORT_KEY);
+        serverPort = Integer.toString((int) conf.get(SERVER_PORT_KEY));
         dbName = (String) conf.get(METRIC_DB_NAME_KEY);
-
 
         // Check if username and passwords fields have been set
         if(conf.containsKey(DB_USERNAME_KEY) && conf.containsKey(DB_PASSWORD_KEY)) {
             String dbUser = (String) conf.get(DB_USERNAME_KEY);
             String dbPwd= (String) conf.get(DB_PASSWORD_KEY);
-            influxDB = InfluxDBFactory.connect(serverHost + ":" + serverPort,
-                    dbUser, dbPwd);
+            influxDB = InfluxDBFactory.connect(serverHost + ":" + serverPort, dbUser, dbPwd);
         } else {
             influxDB = InfluxDBFactory.connect(serverHost + ":" + serverPort);
         }
