@@ -18,7 +18,11 @@ dependencies {
 
     compile group: 'net.sf.jopt-simple', name: 'jopt-simple', version: '4.9'
     compile group: 'com.twitter.heron', name: 'heron-api', version: '0.17.7'
+    compile group: 'com.twitter.heron', name: 'heron-spi', version: '0.17.7'
     compile group: 'org.apache.kafka', name: 'kafka-clients', version: '0.11.0.2'
+
+    compile group: 'org.influxdb', name: 'influxdb-java', version: '2.9'
+
     compile group: 'com.esotericsoftware.kryo', name: 'kryo', version: '2.24.0'
 
     compile group: 'org.slf4j', 'name': 'slf4j-api', version: '1.6.2'

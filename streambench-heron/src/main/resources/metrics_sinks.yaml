@@ -1,0 +1,11 @@
+sinks:
+  - influxdb-sink
+
+# Config for the InfluxDB sink
+influxdb-sink:
+  class: streambench.heron.metrics.InfluxDBSink
+  flush-frequency-ms: 5000 # 5 seconds in ms
+  sink-restart-attempts: -1 # Forever
+  influx-host: http://localhost
+  influx-port: 8086
+  influx-db-name: heron-metrics
