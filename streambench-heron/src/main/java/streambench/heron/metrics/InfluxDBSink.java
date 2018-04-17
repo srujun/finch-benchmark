@@ -50,11 +50,15 @@ public class InfluxDBSink implements IMetricsSink {
         // Check if username and passwords fields have been set
         if(conf.containsKey(DB_USERNAME_KEY) && conf.containsKey(DB_PASSWORD_KEY)) {
             String dbUser = (String) conf.get(DB_USERNAME_KEY);
-            String dbPwd= (String) conf.get(DB_PASSWORD_KEY);
+            String dbPwd = (String) conf.get(DB_PASSWORD_KEY);
             influxDB = InfluxDBFactory.connect(serverHost + ":" + serverPort, dbUser, dbPwd);
         } else {
             influxDB = InfluxDBFactory.connect(serverHost + ":" + serverPort);
         }
+
+        influxDB.enableBatch();
+
+        // TODO: check if database exists, create if it doesn't
 
         LOG.info("Influx Connection created");
     }
@@ -72,11 +76,20 @@ public class InfluxDBSink implements IMetricsSink {
         // Cycle through the metrics and add them to points batch
         record.getMetrics().forEach(
             metric -> {
-                Point point = Point
+                Point point;
+                try {
+                    point = Point
+                        .measurement(metric.getName())
+                        .time(timestamp, TimeUnit.MILLISECONDS)
+                        .addField("value", new Double(metric.getValue()))
+                        .build();
+                } catch (Exception e) {
+                    point = Point
                         .measurement(metric.getName())
                         .time(timestamp, TimeUnit.MILLISECONDS)
                         .addField("value", metric.getValue())
                         .build();
+                }
 
                 // Add the current metric to the points batch
                 points.point(point);
