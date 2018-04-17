@@ -7,10 +7,10 @@ import sys
 from kafka import KafkaConsumer
 from influxdb import InfluxDBClient
 
-INFLUX_IP = 'ip-172-31-60-95'
+INFLUX_IP = 'ip-172-31-53-111'
 INFLUX_PORT = 8086
-KAFA_SERVERS = ['ip-172-31-23-57:9092', 'ip-172-31-27-22:9092']
-DB_NAME = 'streambench-metrics'
+KAFA_SERVERS = ['ip-172-31-5-82:9092', 'ip-172-31-6-235:9092']
+DB_NAME = 'samza-metrics'
 
 
 if len(sys.argv) > 1:
