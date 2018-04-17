@@ -104,12 +104,14 @@ public class InfluxDBSink implements IMetricsSink {
     @Override
     public void flush() {
         LOG.info("Flushing any remaining metrics to InfluxDB");
-        influxDB.flush();
+        if(influxDB != null)
+            influxDB.flush();
     }
 
     @Override
     public void close() {
         LOG.info("Closing InfluxDB connection");
-        influxDB.close();
+        if(influxDB != null)
+            influxDB.close();
     }
 }
