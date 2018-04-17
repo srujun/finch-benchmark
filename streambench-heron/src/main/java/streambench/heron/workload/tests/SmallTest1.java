@@ -28,7 +28,13 @@ public class SmallTest1 {
             .flatMap(msg -> Arrays.asList(msg, msg))
             .toSink(new KafkaSink(bootstrapServers, "sink1"));
 
-        Config config = Config.defaultConfig();
+//        Config config = Config.defaultConfig();
+        Config config = Config.newBuilder()
+                .setNumContainers(5)
+                .setPerContainerRamInMegabytes(512)
+                .setSerializer(Config.Serializer.KRYO)
+                .setDeliverySemantics(Config.DeliverySemantics.ATLEAST_ONCE)
+                .build();
 
         new Runner().run("SmallTest1", config, builder);
     }
