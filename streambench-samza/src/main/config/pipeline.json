@@ -1,0 +1,61 @@
+{
+  "sources": {
+    "source1": {
+      "key_dist": "org.apache.commons.math3.distribution.UniformIntegerDistribution",
+      "key_dist_params": {
+        "lower": 1,
+        "upper": 100
+      },
+      "msg_dist": "org.apache.commons.math3.distribution.UniformIntegerDistribution",
+      "msg_dist_params": {
+        "lower": 10,
+        "upper": 30
+      },
+      "rate_dist": "org.apache.commons.math3.distribution.UniformIntegerDistribution",
+      "rate_dist_params": {
+        "rate": 20000
+      }
+    }
+  },
+  "transformations": {
+    "filter1": {
+      "operator": "filter",
+      "input": "source1",
+      "params": {
+        "p": 0.5
+      }
+    },
+    "split1": {
+      "operator": "split",
+      "input": "filter1",
+      "params": {
+        "n": 2
+      },
+      "outputs": ["split1__1", "split1__2"]
+    },
+    "filter2": {
+      "operator": "filter",
+      "input": "split1__1",
+      "params": {
+        "p": 0.75
+      }
+    },
+    "modify1": {
+      "operator": "modify",
+      "input": "split1__2",
+      "params": {
+        "size_ratio": 1.5
+      }
+    },
+    "join1": {
+      "operator": "join",
+      "inputs": ["filter2", "modify1"],
+      "params": {
+        "ttl": "5s"
+      }
+    }
+  },
+  "sinks": [
+    "join1"
+  ]
+}
