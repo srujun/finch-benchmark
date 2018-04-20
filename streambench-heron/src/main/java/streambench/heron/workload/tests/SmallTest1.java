@@ -24,13 +24,14 @@ public class SmallTest1 {
                        .setName("source1");
 
         source
+            .setNumPartitions(4)
             .filter(msg -> (rand.nextDouble() <= 0.5))
             .flatMap(msg -> Arrays.asList(msg, msg))
             .toSink(new KafkaSink(bootstrapServers, "sink1"));
 
 //        Config config = Config.defaultConfig();
         Config config = Config.newBuilder()
-                .setNumContainers(5)
+                .setNumContainers(8)
                 .setPerContainerRamInMegabytes(512)
                 .setSerializer(Config.Serializer.KRYO)
                 .setDeliverySemantics(Config.DeliverySemantics.ATLEAST_ONCE)
