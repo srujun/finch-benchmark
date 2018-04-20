@@ -23,7 +23,7 @@ public class Pipeline {
         Streamlet<KeyValue<String, String>> source =
                 builder.newSource(new KafkaSource(bootstrapServers, "source1"))
                        .setName("source1")
-                       .setNumPartitions(100);
+                       .setNumPartitions(10);
 
         List<Streamlet<KeyValue<String, String>>> clones = source
             .filter(msg -> (rand.nextDouble() <= 0.5))
