@@ -1,10 +1,5 @@
 package streambench.producer;
 
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
-import joptsimple.OptionSpec;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.distribution.AbstractIntegerDistribution;
 import org.apache.commons.math3.distribution.UniformIntegerDistribution;
 import org.apache.commons.math3.distribution.ZipfDistribution;
@@ -13,78 +8,53 @@ import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.samza.config.Config;
-import org.apache.samza.config.MapConfig;
-import streambench.workload.WorkloadParser;
 import streambench.workload.pojo.WorkloadConfig;
 import streambench.workload.pojo.WorkloadSource;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class SimpleProducer {
-
-    private static final String WORKLOAD_OPT = "workload-path";
-    private static final String PROPERTIES_OPT = "properties-path";
-
     private static final String NUM_KEYS_PARAM = "num_keys";
-    private static final String KAFKA_SERVERS_PARAM = "systems.kafka.producer.bootstrap.servers";
-    private static final String JOB_CONTAINER_COUNT = "job.container.count";
 
     private static RandomStringGenerator generator = new RandomStringGenerator.Builder().withinRange('a', 'z').build();
 
-    public static void main(String[] args) {
+    private KafkaProducer<String, String> producer;
+    private AdminClient client;
+    private ScheduledExecutorService executorService;
 
-        WorkloadConfig workloadConfig = null;
-        Config propertiesConfig = null;
-        try {
-            Pair<WorkloadConfig, Config> pair = SimpleProducer.getWorkloadConfigFromArgs(args);
-            workloadConfig = pair.getLeft();
-            propertiesConfig = pair.getRight();
-        } catch (Exception e) {
-            System.err.println("Unable to parse input files.");
-            System.exit(-1);
-        }
-
-        List<String> bootstrapServers =
-                propertiesConfig.getList(KAFKA_SERVERS_PARAM, Collections.singletonList("localhost:9092"));
-        bootstrapServers.forEach(server -> System.out.println("Bootstrap server: " + server));
-
-        int containerCount = propertiesConfig.getInt(JOB_CONTAINER_COUNT, 1);
+    SimpleProducer(List<String> kafkaBrokers, WorkloadConfig workloadConfig, int partitions,
+                   ScheduledExecutorService executorService) {
+        kafkaBrokers.forEach(server -> System.out.println("Bootstrap server: " + server));
 
         final Properties kafkaConfig = new Properties();
-        kafkaConfig.put("bootstrap.servers", bootstrapServers);
+        kafkaConfig.put("bootstrap.servers", kafkaBrokers);
         kafkaConfig.put("acks", "1"); // only wait for ack from Kafka leader
         kafkaConfig.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         kafkaConfig.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        final KafkaProducer<String, String> producer = new KafkaProducer<>(kafkaConfig);
-        final AdminClient client = AdminClient.create(kafkaConfig);
+        this.producer = new KafkaProducer<>(kafkaConfig);
+        this.client = AdminClient.create(kafkaConfig);
+
+        this.executorService = executorService;
 
         /* create the source topics that this producer will write to */
         try {
-            SimpleProducer.createSources(client, workloadConfig.getSources(), containerCount);
+            createSources(workloadConfig.getSources(), partitions);
         } catch (Exception e) {
             System.err.println("Failed to create Kafka source topics!");
             e.printStackTrace();
             System.exit(-2);
         }
 
-        /* create executor thread pool of size = num of topics to write to */
-        ScheduledExecutorService executorService = Executors.newScheduledThreadPool(workloadConfig.getSources().size());
-
         /* create single threaded executors for each src */
         workloadConfig.getSources().forEach(
             (srcName, src) -> {
                 try {
-                    SimpleProducer.createEmitterForSource(producer, executorService, srcName, src);
+                    createEmitterForSource(srcName, src);
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                     System.exit(-2);
@@ -93,7 +63,7 @@ public class SimpleProducer {
         );
     }
 
-    private static void createSources(AdminClient client, Map<String, WorkloadSource> sources, int partitions)
+    private void createSources(Map<String, WorkloadSource> sources, int partitions)
             throws InterruptedException, ExecutionException {
         /* delete any existing source topics that may exist */
         Set<String> existingTopics = client.listTopics().names().get();
@@ -135,9 +105,7 @@ public class SimpleProducer {
         System.out.println();
     }
 
-    private static void createEmitterForSource(KafkaProducer<String, String> producer,
-                                               ScheduledExecutorService executorService,
-                                               String srcName, WorkloadSource src) throws ClassNotFoundException {
+    void createEmitterForSource(String srcName, WorkloadSource src) throws ClassNotFoundException {
         /* get the various distributions */
         AbstractIntegerDistribution keyDist = SimpleProducer.getDistribution(src.getKey_dist(), src.getKey_dist_params());
         // AbstractIntegerDistribution rateDist = SimpleProducer.getDistribution(src.getRate_dist(), src.getRate_dist_params());
@@ -164,7 +132,7 @@ public class SimpleProducer {
                 System.err.println("GENERATED NEGATIVE KEY INDEX!");
                 keyIndex = 0;
             }
-            String msg = generator.generate(msgDist.sample());
+            String msg = System.nanoTime() + "," + generator.generate(msgDist.sample());
 
             final ProducerRecord<String, String> record = new ProducerRecord<>(srcName, keys[keyIndex], msg);
             producer.send(record);
@@ -177,50 +145,7 @@ public class SimpleProducer {
         executorService.scheduleAtFixedRate(msgEmitter, 0, 1000000 / rate, TimeUnit.MICROSECONDS);
     }
 
-    private static Pair<WorkloadConfig, Config> getWorkloadConfigFromArgs(String[] fromArgs) throws Exception {
-        OptionParser parser = new OptionParser();
-        OptionSpec<File> workloadOpt = parser.accepts(WORKLOAD_OPT, "path to workload JSON file")
-                .withRequiredArg()
-                .ofType(File.class)
-                .required();
-        OptionSpec<File> propertiesOpt = parser.accepts(PROPERTIES_OPT, "path to Samza .properties file")
-                .withRequiredArg()
-                .ofType(File.class)
-                .required();
-        OptionSpec<Void> helpOpt = parser.acceptsAll(Arrays.asList("h", "help"), "Show help")
-                .forHelp();
-
-        OptionSet options = parser.parse(fromArgs);
-        if(options.has(helpOpt) || (!options.has(workloadOpt) || !options.has(propertiesOpt))) {
-            parser.printHelpOn(System.out);
-            System.exit(0);
-        }
-
-        FileReader workloadReader;
-        FileReader propertiesReader;
-
-        try {
-            workloadReader = new FileReader(options.valueOf(workloadOpt));
-        } catch (FileNotFoundException e) {
-            System.err.println("File " + options.valueOf(workloadOpt).getPath() + " not found!");
-            throw e;
-        }
-        try {
-            propertiesReader = new FileReader(options.valueOf(propertiesOpt));
-        } catch (FileNotFoundException e) {
-            System.err.println("File " + options.valueOf(propertiesOpt).getPath() + " not found!");
-            throw e;
-        }
-
-        Properties properties = new Properties();
-        properties.load(propertiesReader);
-        HashMap propertiesMap = new HashMap<>(properties);
-        MapConfig propertiesConfig = new MapConfig(propertiesMap);
-
-        return new ImmutablePair<>(WorkloadParser.getWorkloadConfig(workloadReader), propertiesConfig);
-    }
-
-    private static AbstractIntegerDistribution getDistribution(String type, Map<String, Object> params) throws ClassNotFoundException {
+    static AbstractIntegerDistribution getDistribution(String type, Map<String, Object> params) throws ClassNotFoundException {
         if(type.contains("Zipf")) {
             return new ZipfDistribution(((Double) params.get(NUM_KEYS_PARAM)).intValue(), (Double) params.get("exponent"));
         } else if(type.contains("Uniform")) {
