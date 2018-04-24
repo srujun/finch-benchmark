@@ -1,5 +1,6 @@
 package streambench.heron.workload.tests;
 
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.streamlet.*;
 import streambench.heron.KafkaSink;
 import streambench.heron.KafkaSource;
@@ -9,6 +10,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class Pipeline {
 
@@ -26,11 +28,11 @@ public class Pipeline {
                        .setNumPartitions(10);
 
         List<Streamlet<KeyValue<String, String>>> clones = source
-            .filter(msg -> (rand.nextDouble() <= 0.5))
+            .filter(msg -> (rand.nextDouble() <= 0.5)).setName("filter1")
             .clone(2);
 
         Streamlet<KeyValue<String, String>> stream1 = clones.get(0)
-            .filter(msg -> (rand.nextDouble() <= 0.75));
+            .filter(msg -> (rand.nextDouble() <= 0.75)).setName("filter2");
 
         final double size_ratio = 1.5;
         Streamlet<KeyValue<String, String>> stream2 = clones.get(1)
@@ -46,7 +48,7 @@ public class Pipeline {
                 }
                 finalValBuilder.append(val.substring(0, (new Double(val.length() * size_frac)).intValue()));
                 return new KeyValue<>(key, finalValBuilder.toString());
-            });
+            }).setName("map1");
 
         stream1
             .join(
@@ -55,15 +57,23 @@ public class Pipeline {
                     KeyValue::getValue,
                     WindowConfig.TumblingTimeWindow(Duration.ofSeconds(5)),
                     (msg1, msg2) -> msg1.getValue() + msg2.getValue())
+                .setName("join1")
             .map(windowKeyValue -> KeyValue.create(windowKeyValue.getKey().getKey(), windowKeyValue.getValue()))
-            .toSink(new KafkaSink(bootstrapServers, "sinkpipeline"));
+                .setName("map2")
+            .toSink(new KafkaSink(bootstrapServers, "sink1"));
 
-//        Config config = Config.defaultConfig();
+        long bytes_256MB = ByteAmount.fromMegabytes(256).asBytes();
+        List<String> components = Arrays.asList("source1", "filter1", "filter2", "map1", "join1", "sink1");
+        components = components.stream().map(component -> component + ":" + bytes_256MB).collect(Collectors.toList());
+        String ramMap = String.join(",", components);
+
+        // Config config = Config.defaultConfig();
         Config config = Config.newBuilder()
                 .setNumContainers(10)
-                .setPerContainerRamInMegabytes(512)
+                // .setPerContainerRamInMegabytes(512)
                 .setSerializer(Config.Serializer.KRYO)
                 .setDeliverySemantics(Config.DeliverySemantics.ATLEAST_ONCE)
+                .setUserConfig(com.twitter.heron.api.Config.TOPOLOGY_COMPONENT_RAMMAP, ramMap)
                 .build();
 
         new Runner().run("Pipeline", config, builder);
