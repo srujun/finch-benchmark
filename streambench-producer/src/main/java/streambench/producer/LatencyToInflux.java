@@ -24,6 +24,8 @@ public class LatencyToInflux {
     private List<String> kafkaBrokers;
     private WorkloadConfig workloadConfig;
 
+    private long batchSize;
+
     public LatencyToInflux(List<String> kafkaBrokers, WorkloadConfig workloadConfig,
                            String influxServer, String db, ScheduledExecutorService executorService) {
         this.kafkaBrokers = kafkaBrokers;
@@ -45,6 +47,7 @@ public class LatencyToInflux {
         if(!influxDB.databaseExists(db)) {
             influxDB.createDatabase(db);
         }
+        System.out.println("Connected to " + influxServer);
     }
 
     private void connectToKafka() {
@@ -58,6 +61,7 @@ public class LatencyToInflux {
         consumer = new KafkaConsumer<>(props);
 
         consumer.subscribe(workloadConfig.getSinks());
+        System.out.println("Subscribed Kafka to " + workloadConfig.getSinks());
     }
 
     class MsgReader implements Runnable {
@@ -85,6 +89,8 @@ public class LatencyToInflux {
                     System.err.println("Could not write to InfluxDB");
                     e.printStackTrace();
                 }
+
+                batchSize += points.getPoints().size();
             }
         }
     }
@@ -92,8 +98,11 @@ public class LatencyToInflux {
     class InfluxFlusher implements Runnable {
         @Override
         public void run() {
-            if(influxDB != null)
+            if(influxDB != null) {
+                System.out.println("Flushing " + batchSize + " points to InfluxDB");
+                batchSize = 0;
                 influxDB.flush();
+            }
         }
     }
 }
