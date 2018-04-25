@@ -39,15 +39,15 @@ public class Pipeline {
             .map(msg -> {
                 String key = msg.getKey();
                 String val = msg.getValue();
-                StringBuilder finalValBuilder = new StringBuilder();
-                int size_whole = (new Double(Math.floor(size_ratio))).intValue();
-                double size_frac = size_ratio - Math.floor(size_ratio);
-
-                for(int i = 0; i < size_whole; i++) {
-                    finalValBuilder.append(val);
-                }
-                finalValBuilder.append(val.substring(0, (new Double(val.length() * size_frac)).intValue()));
-                return new KeyValue<>(key, finalValBuilder.toString());
+//                StringBuilder finalValBuilder = new StringBuilder();
+//                int size_whole = (new Double(Math.floor(size_ratio))).intValue();
+//                double size_frac = size_ratio - Math.floor(size_ratio);
+//
+//                for(int i = 0; i < size_whole; i++) {
+//                    finalValBuilder.append(val);
+//                }
+//                finalValBuilder.append(val.substring(0, (new Double(val.length() * size_frac)).intValue()));
+                return new KeyValue<>(key, val + "abcdefghijklm");
             }).setName("cmap1");
 
         stream1
@@ -56,7 +56,7 @@ public class Pipeline {
                     KeyValue::getKey,
                     KeyValue::getValue,
                     WindowConfig.TumblingTimeWindow(Duration.ofSeconds(5)),
-                    (msg1, msg2) -> msg1.getValue() + msg2.getValue())
+                    (msg1, msg2) -> msg2.getValue() /*+ msg2.getValue()*/)
                 .setName("join1")
             .map(windowKeyValue -> KeyValue.create(windowKeyValue.getKey().getKey(), windowKeyValue.getValue()))
                 .setName("cmap2")
