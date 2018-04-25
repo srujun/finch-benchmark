@@ -47,7 +47,7 @@
         "size_ratio": 1.5
       }
     },
-    "join1": {
+    "sink1": {
       "operator": "join",
       "inputs": ["filter2", "modify1"],
       "params": {
@@ -56,6 +56,6 @@
     }
   },
   "sinks": [
-    "join1"
+    "sink1"
   ]
 }
