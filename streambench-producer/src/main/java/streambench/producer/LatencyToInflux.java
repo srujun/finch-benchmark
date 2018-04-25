@@ -39,7 +39,7 @@ public class LatencyToInflux {
     }
 
     private void connectToInflux() {
-        influxDB = InfluxDBFactory.connect(influxServer);
+        influxDB = InfluxDBFactory.connect("http://" + influxServer);
         influxDB.enableBatch();
 
         if(!influxDB.databaseExists(db)) {
