@@ -74,7 +74,6 @@ public class LatencyToInflux {
                 BatchPoints points = BatchPoints.database(db).build();
 
                 ConsumerRecords<String, String> records = consumer.poll(100);
-                System.out.println("Got " + records.count() + " points");
 
                 final int toSkip = records.count() / SKIP_RATIO;
                 int skipped = 0;
