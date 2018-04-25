@@ -29,7 +29,7 @@ public class Pipeline {
 
         List<Streamlet<KeyValue<String, String>>> clones = source
             .filter(msg -> (rand.nextDouble() <= 0.5)).setName("filter1")
-            .clone(2);
+            .clone(2); // creates 2 map functions
 
         Streamlet<KeyValue<String, String>> stream1 = clones.get(0)
             .filter(msg -> (rand.nextDouble() <= 0.75)).setName("filter2");
@@ -48,7 +48,7 @@ public class Pipeline {
                 }
                 finalValBuilder.append(val.substring(0, (new Double(val.length() * size_frac)).intValue()));
                 return new KeyValue<>(key, finalValBuilder.toString());
-            }).setName("map1");
+            }).setName("cmap1");
 
         stream1
             .join(
@@ -59,11 +59,11 @@ public class Pipeline {
                     (msg1, msg2) -> msg1.getValue() + msg2.getValue())
                 .setName("join1")
             .map(windowKeyValue -> KeyValue.create(windowKeyValue.getKey().getKey(), windowKeyValue.getValue()))
-                .setName("map2")
+                .setName("cmap2")
             .toSink(new KafkaSink(bootstrapServers, "sink1"));
 
         long bytes_256MB = ByteAmount.fromMegabytes(256).asBytes();
-        List<String> components = Arrays.asList("source1", "filter1", "filter2", "map1", "join1", "sink1");
+        List<String> components = Arrays.asList("source1", "filter1", "filter2", "map1", "map2", "cmap1", "cmap2", "join1", "sink1");
         components = components.stream().map(component -> component + ":" + bytes_256MB).collect(Collectors.toList());
         String ramMap = String.join(",", components);
 
