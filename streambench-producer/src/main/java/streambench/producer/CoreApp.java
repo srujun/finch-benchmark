@@ -21,8 +21,8 @@ public class CoreApp {
     private static final String INFLUX_OPT = "influx";
     private static final String DB_OPT = "db";
 
-    private static List<String> DEFAULT_KAFKA = Arrays.asList("ip-172-31-5-82:9092", "ip-172-31-6-235:9092");
-    private static String DEFAULT_INFLUXDB_DBNAME = "latency-metrics";
+    private static final List<String> DEFAULT_KAFKA = Arrays.asList("ip-172-31-5-82:9092", "ip-172-31-6-235:9092");
+    private static final String DEFAULT_INFLUXDB_DBNAME = "latency-metrics";
 
     private OptionSpec<Void> helpOpt;
     private OptionSpec<File> workloadOpt;

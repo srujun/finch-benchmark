@@ -9,12 +9,15 @@ import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
 import streambench.workload.pojo.WorkloadConfig;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class LatencyToInflux {
+
+    private static final int SKIP_RATIO = 5;
 
     private InfluxDB influxDB;
     private KafkaConsumer<String, String> consumer;
@@ -53,15 +56,15 @@ public class LatencyToInflux {
     private void connectToKafka() {
         Properties props = new Properties();
         props.put("bootstrap.servers", kafkaBrokers);
-//        props.put("group.id", "test");
-        props.put("enable.auto.commit", "true");
-        props.put("auto.commit.interval.ms", "1000");
+        props.put("group.id", "finch");
+//        props.put("enable.auto.commit", "true");
+//        props.put("auto.commit.interval.ms", "1000");
         props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         consumer = new KafkaConsumer<>(props);
 
         consumer.subscribe(workloadConfig.getSinks());
-        System.out.println("Subscribed Kafka to " + workloadConfig.getSinks());
+        System.out.println("Subscribed Kafka to " + consumer.subscription());
     }
 
     class MsgReader implements Runnable {
@@ -71,7 +74,18 @@ public class LatencyToInflux {
                 BatchPoints points = BatchPoints.database(db).build();
 
                 ConsumerRecords<String, String> records = consumer.poll(100);
+                System.out.println("Got " + records.count() + " points");
+
+                final int toSkip = records.count() / SKIP_RATIO;
+                int skipped = 0;
+
                 for (ConsumerRecord<String, String> record : records) {
+                    if(skipped < toSkip) {
+                        skipped += 1;
+                        continue;
+                    }
+                    skipped = 0;
+
                     String ts = record.value().split(",")[0];
                     Long latency = System.nanoTime() - new Long(ts);
 

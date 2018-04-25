@@ -53,9 +53,16 @@ public class Pipeline {
         stream1
             .join(
                     stream2,
-                    KeyValue::getKey,
-                    KeyValue::getValue,
+                    kv -> {
+                        int num = Integer.parseInt(kv.getKey().substring(3));
+                        return "key" + (num % 25);
+                    },
+                    kv -> {
+                        int num = Integer.parseInt(kv.getKey().substring(3));
+                        return "key" + (num % 25);
+                    },
                     WindowConfig.TumblingTimeWindow(Duration.ofSeconds(5)),
+                    JoinType.INNER,
                     (msg1, msg2) -> msg2.getValue() /*+ msg2.getValue()*/)
                 .setName("join1")
             .map(windowKeyValue -> KeyValue.create(windowKeyValue.getKey().getKey(), windowKeyValue.getValue()))
