@@ -1,6 +1,6 @@
-# stream-bench
-*Benchmarking generalized Stream-Processing workloads*
+# finch-benchmark
+*Benchmarking Modern Distributed Stream Processing Systems with Customizable Synthetic Workloads*
 
-This repo holds documentation and code for my senior thesis project: creating a generalized benchmarking framework for stream processing workloads. This project is still in heavy construction and much of it is unusable without knowing how the framework functions.
+This repository contains documentation and code for my undergraduate thesis project at UIUC. This project is still in heavy construction and much of it is unusable without knowing how the framework functions.
 
 See the [wiki ](https://github.com/srujun/stream-bench/wiki) for more information.
